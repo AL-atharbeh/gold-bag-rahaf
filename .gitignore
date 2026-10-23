@@ -1,0 +1,34 @@
+.DS_Store
+build/
+.dart_tool/
+.packages
+*.iml
+.idea/
+.vscode/
+
+# يحمل مفتاح المشروع — لا يُرفع
+run.sh
+
+# مفتاح التوقيع — لا يُرفع ولا يُشارك
+android/key.properties
+android/app/upload-keystore.jks
+
+# نسخ APK المبنية — تُوزَّع يدوياً لا عبر المستودع
+dist/
+*.apk
+*.aab
+
+# مشاريع أخرى موجودة في نفس المجلد — ليست من هذا التطبيق
+nawl-rugs/
+shifra-viral/
+
+# إعدادات محلية
+.claude/
+local.properties
+android/.gradle/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+.flutter-plugins
+.flutter-plugins-dependencies

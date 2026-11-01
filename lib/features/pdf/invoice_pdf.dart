@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../core/phone.dart';
 import '../../core/units.dart';
 import '../../domain/enums.dart';
+import '../../domain/ledger.dart';
 import '../../domain/models.dart';
 import '../../platform/labels.dart';
 import 'pdf_kit.dart';
@@ -34,11 +35,23 @@ Future<Uint8List> buildInvoicePdf({
       gold.where((x) => x.itemName == null && x.amount < 0).toList();
   final scrapOut =
       gold.where((x) => x.itemName == null && x.amount > 0).toList();
-  final making = cash.where((x) => x.makingPerGramFils != null).toList();
-  final cashIn =
-      cash.where((x) => x.makingPerGramFils == null && x.amount < 0).toList();
-  final cashOut =
-      cash.where((x) => x.makingPerGramFils == null && x.amount > 0).toList();
+  bool isFix(TxLine x) => x.note == noteFixGold || x.note == noteFixScrap;
+  bool special(TxLine x) =>
+      x.makingPerGramFils != null ||
+      x.note == noteMakingDiscount ||
+      x.note == noteExchangeFee ||
+      isFix(x);
+  final making = cash
+      .where(
+          (x) => x.makingPerGramFils != null && x.note != noteRecoveredMaking)
+      .toList();
+  final recoveredMaking =
+      cash.where((x) => x.note == noteRecoveredMaking).toList();
+  final discount = cash.where((x) => x.note == noteMakingDiscount).toList();
+  final exchangeFee = cash.where((x) => x.note == noteExchangeFee).toList();
+  final fixValue = cash.where(isFix).toList();
+  final cashIn = cash.where((x) => !special(x) && x.amount < 0).toList();
+  final cashOut = cash.where((x) => !special(x) && x.amount > 0).toList();
   final goldTotal = gold.fold<int>(0, (a, x) => a + x.amount);
   final cashTotal = cash.fold<int>(0, (a, x) => a + x.amount);
 
@@ -124,7 +137,7 @@ Future<Uint8List> buildInvoicePdf({
               pw.TableRow(children: [
                 pdfCell(
                   rate
-                      ? '${formatDinars(x.makingPerGramFils!)} $jd / $g'
+                      ? '${formatDinars(x.makingPerGramFils!)} $jd / ${x.note == noteMakingPiece ? (ar ? 'قطعة' : 'piece') : g}'
                       : (ar ? 'مبلغ' : 'Amount'),
                   align: ar ? pw.TextAlign.right : pw.TextAlign.left,
                 ),
@@ -200,7 +213,11 @@ Future<Uint8List> buildInvoicePdf({
         if (goodsOut.isNotEmpty)
           goodsTable(ar ? 'البضاعة المباعة' : 'Goods sold', goodsOut),
         if (goodsIn.isNotEmpty)
-          goodsTable(ar ? 'البضاعة المستلمة' : 'Goods received', goodsIn),
+          goodsTable(
+              tx.type == TxType.sale
+                  ? (ar ? 'المسترد من المحل' : 'Recovered goods')
+                  : (ar ? 'البضاعة المستلمة' : 'Goods received'),
+              goodsIn),
         if (scrapIn.isNotEmpty)
           goodsTable(ar ? 'الكسر المستلم' : 'Scrap received', scrapIn),
         if (scrapOut.isNotEmpty)
@@ -209,6 +226,20 @@ Future<Uint8List> buildInvoicePdf({
           cashTable(ar ? 'المصنوعية' : 'Making charges', making, rate: true),
         if (cashIn.isNotEmpty)
           cashTable(ar ? 'نقد مقبوض' : 'Cash received', cashIn),
+        if (recoveredMaking.isNotEmpty)
+          cashTable(ar ? 'مصنوعية المسترد' : 'Recovered making',
+              recoveredMaking,
+              rate: true),
+        if (discount.isNotEmpty)
+          cashTable(ar ? 'خصم المصنوعية' : 'Making discount', discount),
+        if (exchangeFee.isNotEmpty)
+          cashTable(ar ? 'أجور البدل' : 'Exchange fee', exchangeFee),
+        if (fixValue.isNotEmpty)
+          cashTable(
+              fixValue.first.note == noteFixScrap
+                  ? (ar ? 'تسكير كسر' : 'Fix — scrap')
+                  : (ar ? 'تسكير حلة' : 'Fix — gold'),
+              fixValue),
         if (cashOut.isNotEmpty)
           cashTable(ar ? 'نقد مدفوع' : 'Cash paid', cashOut),
         pdfSectionTitle(ar ? 'الأثر على الحساب' : 'Effect on account'),

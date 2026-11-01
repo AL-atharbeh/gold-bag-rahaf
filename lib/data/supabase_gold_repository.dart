@@ -165,7 +165,7 @@ class SupabaseGoldRepository implements GoldRepository {
     final rows = <Map<String, dynamic>>[];
     for (var start = 0;; start += page) {
       var q = _client.from('postings').select(
-          'tx_id, account_id, ledger, amount, gross_weight_mg, quantity, item_id, karat_id, making_per_gram_fils, '
+          'tx_id, account_id, ledger, amount, gross_weight_mg, quantity, item_id, karat_id, making_per_gram_fils, note, '
           'items(name), karats(name), '
           'transactions!inner(type, doc_number, occurred_at, reversed_by_tx_id, counterparty_id, accounts(name, kind))');
       if (accountId != null) q = q.eq('account_id', accountId);
@@ -320,14 +320,17 @@ class SupabaseGoldRepository implements GoldRepository {
     required String makingIncomeId,
     List<GoodsLine> goods = const [],
     List<GoodsLine> scrap = const [],
+    List<GoodsLine> recovered = const [],
     int cashReceivedFils = 0,
     int costOutFils = 0,
+    int costBackFils = 0,
+    int makingDiscountFils = 0,
     DateTime? occurredAt,
     String? note,
   }) =>
       _post(
         // نوع الحركة يتبع أهم ما فيها: بيع، أو دفعة كسر، أو دفعة نقد
-        goods.isNotEmpty
+        goods.isNotEmpty || recovered.isNotEmpty
             ? TxType.sale
             : scrap.isNotEmpty
                 ? TxType.goldPayment
@@ -342,8 +345,183 @@ class SupabaseGoldRepository implements GoldRepository {
           makingIncomeId: makingIncomeId,
           goods: goods,
           scrap: scrap,
+          recovered: recovered,
           cashReceivedFils: cashReceivedFils,
           costOutFils: costOutFils,
+          costBackFils: costBackFils,
+          makingDiscountFils: makingDiscountFils,
+        ),
+      );
+
+  @override
+  Future<Map<String, LastMaking>> lastMakings(String partyId) async {
+    const page = 1000;
+    final rows = <Map<String, dynamic>>[];
+    for (var start = 0;; start += page) {
+      final chunk = await _client
+          .from('postings')
+          .select('item_id, karat_id, amount, making_per_gram_fils, note, '
+              'transactions!inner(occurred_at, reversed_by_tx_id)')
+          .eq('account_id', partyId)
+          .eq('ledger', LedgerKind.cash.wire)
+          .not('item_id', 'is', null)
+          .not('making_per_gram_fils', 'is', null)
+          .isFilter('transactions.reversed_by_tx_id', null)
+          .order('tx_id')
+          .order('seq')
+          .range(start, start + page - 1);
+      rows.addAll(chunk);
+      if (chunk.length < page) break;
+    }
+    String at(Map<String, dynamic> r) =>
+        (r['transactions'] as Map)['occurred_at'] as String;
+    final sale = rows.where((r) => (r['amount'] as num) > 0).toList()
+      ..sort((a, b) =>
+          DateTime.parse(at(a)).compareTo(DateTime.parse(at(b))));
+    return {
+      for (final r in sale)
+        '${r['item_id']}|${r['karat_id']}': LastMaking(
+          (r['making_per_gram_fils'] as num).toInt(),
+          r['note'] == noteMakingPiece,
+        ),
+    };
+  }
+
+  @override
+  Future<String> fix({
+    required String partyId,
+    required String tradingIncomeId,
+    required String cashboxId,
+    required int netWeightMg,
+    required int pricePerGramFils,
+    required bool owedToUs,
+    int cashFils = 0,
+    String? traderId,
+    int traderNetMg = 0,
+    int traderPriceFils = 0,
+    String? classNote,
+    DateTime? occurredAt,
+    String? note,
+  }) =>
+      _post(
+        TxType.pricing,
+        partyId,
+        occurredAt,
+        note,
+        _builder.fix(
+          counterpartyId: partyId,
+          tradingIncomeId: tradingIncomeId,
+          cashboxId: cashboxId,
+          netWeightMg: netWeightMg,
+          pricePerGramFils: pricePerGramFils,
+          owedToUs: owedToUs,
+          cashFils: cashFils,
+          traderId: traderId,
+          traderNetMg: traderNetMg,
+          traderPriceFils: traderPriceFils,
+          classNote: classNote,
+        ),
+        pricePerGramFils: pricePerGramFils,
+      );
+
+  @override
+  Future<String> exchange({
+    required String partyId,
+    required String bagAccountId,
+    required String makingIncomeId,
+    List<GoodsLine> received = const [],
+    List<GoodsLine> delivered = const [],
+    int feePerGramFils = 0,
+    bool feeForUs = false,
+    DateTime? occurredAt,
+    String? note,
+  }) =>
+      _post(
+        TxType.goldPayment,
+        partyId,
+        occurredAt,
+        note,
+        _builder.exchange(
+          partyId: partyId,
+          bagAccountId: bagAccountId,
+          makingIncomeId: makingIncomeId,
+          received: received,
+          delivered: delivered,
+          feePerGramFils: feePerGramFils,
+          feeForUs: feeForUs,
+        ),
+      );
+
+  @override
+  Future<String> employeeDraw({
+    required String employeeId,
+    required String cashboxId,
+    required int amountFils,
+    DateTime? occurredAt,
+    String? note,
+  }) =>
+      _post(
+        TxType.cashPayment,
+        employeeId,
+        occurredAt,
+        note,
+        [
+          PostingDraft.cash(
+              accountId: cashboxId,
+              amountFils: amountFils,
+              debit: false,
+              note: noteEmployeeDraw),
+          PostingDraft.cash(
+              accountId: employeeId,
+              amountFils: amountFils,
+              debit: true,
+              note: noteEmployeeDraw),
+        ],
+      );
+
+  @override
+  Future<String> openingParty({
+    required String partyId,
+    required String capitalId,
+    int goldMg = 0,
+    int cashFils = 0,
+    DateTime? occurredAt,
+  }) =>
+      _post(
+        TxType.openingBalance,
+        partyId,
+        occurredAt,
+        null,
+        _builder.openingParty(
+          partyId: partyId,
+          capitalId: capitalId,
+          goldMg: goldMg,
+          cashFils: cashFils,
+        ),
+      );
+
+  @override
+  Future<String> openingBag({
+    required String bagAccountId,
+    required String cashboxId,
+    required String capitalId,
+    List<GoodsLine> goods = const [],
+    List<GoodsLine> scrap = const [],
+    int cashFils = 0,
+    DateTime? occurredAt,
+  }) =>
+      _post(
+        TxType.openingBalance,
+        null,
+        occurredAt,
+        null,
+        _builder.openingBag(
+          bagAccountId: bagAccountId,
+          cashboxId: cashboxId,
+          capitalId: capitalId,
+          goods: goods,
+          scrap: scrap,
+          cashFils: cashFils,
         ),
       );
 
@@ -751,56 +929,6 @@ class SupabaseGoldRepository implements GoldRepository {
           amountFils: amountFils,
         ),
       );
-
-  @override
-  Future<String> retailSale({
-    required String customerId,
-    required String inventoryAccountId,
-    required String incomeAccountId,
-    required int totalFils,
-    required List<GoodsLine> lines,
-    int paidFils = 0,
-    String? cashboxId,
-    DateTime? occurredAt,
-    String? note,
-  }) {
-    // البضاعة تخرج بوزنها، والدين بالمبلغ المتفق لا بحساب الوزن
-    final drafts = <PostingDraft>[
-      for (final l in lines) ...[
-        PostingDraft(
-          accountId: inventoryAccountId,
-          ledger: LedgerKind.gold,
-          amount: -l.netMg,
-          karatId: l.karatId,
-          karatPpm: l.karatPpm,
-          grossWeightMg: -l.grossWeightMg,
-          quantity: l.quantity,
-        ),
-        PostingDraft(
-          accountId: incomeAccountId,
-          ledger: LedgerKind.gold,
-          amount: l.netMg,
-          karatId: l.karatId,
-          karatPpm: l.karatPpm,
-          grossWeightMg: l.grossWeightMg,
-          quantity: l.quantity,
-        ),
-      ],
-      PostingDraft(
-          accountId: customerId, ledger: LedgerKind.cash, amount: totalFils),
-      PostingDraft(
-          accountId: incomeAccountId,
-          ledger: LedgerKind.cash,
-          amount: -totalFils),
-      if (paidFils > 0 && cashboxId != null) ...[
-        PostingDraft(
-            accountId: cashboxId, ledger: LedgerKind.cash, amount: paidFils),
-        PostingDraft(
-            accountId: customerId, ledger: LedgerKind.cash, amount: -paidFils),
-      ],
-    ];
-    return _post(TxType.sale, customerId, occurredAt, note, drafts);
-  }
 
   @override
   Future<String> reverse(String txId, {String? reason}) async {

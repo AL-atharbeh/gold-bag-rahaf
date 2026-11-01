@@ -16,6 +16,25 @@ class UnbalancedEntryException implements Exception {
       'قيد غير متوازن في دفتر ${ledger.label}: الفرق $difference';
 }
 
+/// ملاحظات سطور القيد التي تحدد معنى السطر عند العرض والتقارير.
+const noteMaking = 'مصنوعية';
+const noteMakingPiece = 'مصنوعية بالقطعة';
+const noteMakingDiscount = 'خصم مصنوعية';
+const noteRecovered = 'مسترد';
+const noteRecoveredMaking = 'مصنوعية مسترد';
+const noteFixGold = 'تسكير حلة';
+const noteFixScrap = 'تسكير كسر';
+const noteExchangeFee = 'أجور بدل';
+const noteEmployeeDraw = 'سحب موظف';
+
+/// خصم المصنوعية على المجموع النهائي: كسر الدينار، ومعه خصم إضافي إن وُجد.
+/// 150.500 بلا إضافة = 0.500، وبإضافة 10 = 10.500، فالنهائي 150 أو 140.
+MoneyFils makingDiscountFor(MoneyFils totalFils, {MoneyFils extraFils = 0}) {
+  if (totalFils <= 0) return 0;
+  final d = totalFils % filsPerDinar + extraFils;
+  return d > totalFils ? totalFils : d;
+}
+
 /// سطر قيد قبل الإرسال.
 class PostingDraft {
   const PostingDraft({
@@ -62,6 +81,8 @@ class PostingDraft {
     required MoneyFils amountFils,
     required bool debit,
     int? makingPerGramFils,
+    String? itemId,
+    String? karatId,
     String? note,
   }) =>
       PostingDraft(
@@ -69,6 +90,8 @@ class PostingDraft {
         ledger: LedgerKind.cash,
         amount: debit ? amountFils : -amountFils,
         makingPerGramFils: makingPerGramFils,
+        itemId: itemId,
+        karatId: karatId,
         note: note,
       );
 
@@ -109,6 +132,7 @@ class GoodsLine {
     String? itemId,
     int? quantity,
     MoneyFils makingPerGramFils = 0,
+    bool makingPerPiece = false,
   }) =>
       GoodsLine(
         grossWeightMg: grossWeightMg,
@@ -117,6 +141,7 @@ class GoodsLine {
         itemId: itemId,
         quantity: quantity,
         makingPerGramFils: makingPerGramFils,
+        makingPerPiece: makingPerPiece,
       );
 
   const GoodsLine({
@@ -126,6 +151,7 @@ class GoodsLine {
     this.itemId,
     this.quantity,
     this.makingPerGramFils = 0,
+    this.makingPerPiece = false,
   });
 
   final WeightMg grossWeightMg;
@@ -133,12 +159,20 @@ class GoodsLine {
   final KaratPpm karatPpm;
   final String? itemId;
   final int? quantity;
+
+  /// الأجرة للغرام، أو للقطعة إن كان [makingPerPiece] صحيحاً.
   final MoneyFils makingPerGramFils;
+  final bool makingPerPiece;
 
   WeightMg get netMg => netWeight(grossWeightMg, karatPpm);
 
-  /// الأجرة تُحسب على الوزن القائم لا الصافي — هذا ما يفعله التاجر عملياً.
-  MoneyFils get makingFils => weightValue(grossWeightMg, makingPerGramFils);
+  /// الأجرة على الوزن القائم لا الصافي — هذا ما يفعله التاجر عملياً —
+  /// أو على عدد القطع.
+  MoneyFils get makingFils => makingPerPiece
+      ? (quantity ?? 0) * makingPerGramFils
+      : weightValue(grossWeightMg, makingPerGramFils);
+
+  String get makingNote => makingPerPiece ? noteMakingPiece : noteMaking;
 }
 
 /// يبني سطور القيد لكل عملية. لا يتصل بالشبكة — قابل للاختبار وحده.
@@ -223,13 +257,22 @@ class LedgerBuilder {
     required String makingIncomeId,
     List<GoodsLine> goods = const [],
     List<GoodsLine> scrap = const [],
+    List<GoodsLine> recovered = const [],
     MoneyFils cashReceivedFils = 0,
     MoneyFils costOutFils = 0,
+    MoneyFils costBackFils = 0,
+    MoneyFils makingDiscountFils = 0,
   }) {
-    if (goods.isEmpty && scrap.isEmpty && cashReceivedFils <= 0) {
+    if (goods.isEmpty &&
+        scrap.isEmpty &&
+        recovered.isEmpty &&
+        cashReceivedFils <= 0) {
       throw ArgumentError('الحركة فارغة — أدخل بضاعة أو كسراً أو مبلغاً');
     }
-    if (cashReceivedFils < 0 || costOutFils < 0) {
+    if (cashReceivedFils < 0 ||
+        costOutFils < 0 ||
+        costBackFils < 0 ||
+        makingDiscountFils < 0) {
       throw ArgumentError('المبالغ لا تكون سالبة');
     }
 
@@ -264,16 +307,97 @@ class LedgerBuilder {
             amountFils: l.makingFils,
             debit: true, // عليه مصنوعية
             makingPerGramFils: l.makingPerGramFils,
-            note: 'مصنوعية',
+            // الصنف والعيار هنا لتذكّر آخر مصنوعية لهذا المحل
+            itemId: l.itemId,
+            karatId: l.karatId,
+            note: l.makingNote,
           ))
           ..add(PostingDraft.cash(
             accountId: makingIncomeId,
             amountFils: l.makingFils,
             debit: false,
             makingPerGramFils: l.makingPerGramFils,
-            note: 'مصنوعية',
+            note: l.makingNote,
           ));
       }
+    }
+
+    // المسترد: بضاعة تعود من المحل داخل نفس الحركة، ويُخصم ذهبها عنه.
+    // مصنوعيته صفر ما لم يُدخل المستخدم رقماً.
+    for (final l in recovered) {
+      if (l.grossWeightMg <= 0) {
+        throw ArgumentError('الوزن يجب أن يكون أكبر من صفر');
+      }
+      drafts
+        ..add(PostingDraft.gold(
+          accountId: bagAccountId,
+          grossWeightMg: l.grossWeightMg,
+          karatId: l.karatId,
+          karatPpm: l.karatPpm,
+          debit: true,
+          itemId: l.itemId,
+          quantity: l.quantity,
+          note: noteRecovered,
+        ))
+        ..add(PostingDraft.gold(
+          accountId: shopId,
+          grossWeightMg: l.grossWeightMg,
+          karatId: l.karatId,
+          karatPpm: l.karatPpm,
+          debit: false,
+          itemId: l.itemId,
+          quantity: l.quantity,
+          note: noteRecovered,
+        ));
+      if (l.makingFils != 0) {
+        drafts
+          ..add(PostingDraft.cash(
+            accountId: shopId,
+            amountFils: l.makingFils,
+            debit: false,
+            makingPerGramFils: l.makingPerGramFils,
+            note: noteRecoveredMaking,
+          ))
+          ..add(PostingDraft.cash(
+            accountId: makingIncomeId,
+            amountFils: l.makingFils,
+            debit: true,
+            makingPerGramFils: l.makingPerGramFils,
+            note: noteRecoveredMaking,
+          ));
+      }
+    }
+
+    if (makingDiscountFils > 0) {
+      drafts
+        ..add(PostingDraft.cash(
+          accountId: shopId,
+          amountFils: makingDiscountFils,
+          debit: false, // ينقص ما عليه من مصنوعية
+          note: noteMakingDiscount,
+        ))
+        ..add(PostingDraft.cash(
+          accountId: makingIncomeId,
+          amountFils: makingDiscountFils,
+          debit: true,
+          note: noteMakingDiscount,
+        ));
+    }
+
+    if (costBackFils > 0) {
+      drafts
+        ..add(PostingDraft.cash(
+          accountId: bagAccountId,
+          amountFils: costBackFils,
+          debit: true, // تعود تكلفة القطع إلى رأس مال الشنطة
+          note: 'تكلفة مصنوعية المسترد',
+        ))
+        ..add(PostingDraft.cash(
+          accountId: makingIncomeId,
+          amountFils: costBackFils,
+          debit: false,
+          note: 'تكلفة مصنوعية المسترد',
+        ));
     }
 
     if (costOutFils > 0) {
@@ -485,6 +609,7 @@ class LedgerBuilder {
     required WeightMg netWeightMg,
     required MoneyFils pricePerGramFils,
     required bool owedToUs,
+    String? note,
   }) {
     if (netWeightMg <= 0) {
       throw ArgumentError('وزن التسكير يجب أن يكون أكبر من صفر');
@@ -502,6 +627,7 @@ class LedgerBuilder {
         accountId: counterpartyId,
         ledger: LedgerKind.gold,
         amount: -sign * netWeightMg,
+        note: note,
       ),
       PostingDraft(
         accountId: tradingIncomeId,
@@ -513,6 +639,7 @@ class LedgerBuilder {
         accountId: counterpartyId,
         ledger: LedgerKind.cash,
         amount: sign * value,
+        note: note,
       ),
       PostingDraft(
         accountId: tradingIncomeId,
@@ -520,6 +647,183 @@ class LedgerBuilder {
         amount: -sign * value,
       ),
     ]);
+  }
+
+  /// تسكير كامل: يثبّت السعر على الطرف، ومعه اختيارياً:
+  /// - دفعة نقدية في نفس الحركة [cashFils] (كلها أو جزء أو صفر): تدخل
+  ///   الصندوق إن كان الذهب لنا، وتخرج منه إن كان علينا، والباقي يبقى ذمة.
+  /// - تسكير مقابل مع تاجر [traderId] بغراماته وسعره بالاتجاه المعاكس،
+  ///   فيبقى فرق السعر في حساب إيراد التجارة.
+  /// [classNote] تصنيف حلة/كسر، للتقارير فقط — لا يغيّر أي رقم.
+  List<PostingDraft> fix({
+    required String counterpartyId,
+    required String tradingIncomeId,
+    required String cashboxId,
+    required WeightMg netWeightMg,
+    required MoneyFils pricePerGramFils,
+    required bool owedToUs,
+    MoneyFils cashFils = 0,
+    String? traderId,
+    WeightMg traderNetMg = 0,
+    MoneyFils traderPriceFils = 0,
+    String? classNote,
+  }) {
+    if (cashFils < 0) throw ArgumentError('المبالغ لا تكون سالبة');
+    return _checked([
+      ...price(
+        counterpartyId: counterpartyId,
+        tradingIncomeId: tradingIncomeId,
+        netWeightMg: netWeightMg,
+        pricePerGramFils: pricePerGramFils,
+        owedToUs: owedToUs,
+        note: classNote,
+      ),
+      if (cashFils > 0) ...[
+        PostingDraft.cash(
+            accountId: cashboxId, amountFils: cashFils, debit: owedToUs),
+        PostingDraft.cash(
+            accountId: counterpartyId, amountFils: cashFils, debit: !owedToUs),
+      ],
+      if (traderId != null)
+        ...price(
+          counterpartyId: traderId,
+          tradingIncomeId: tradingIncomeId,
+          netWeightMg: traderNetMg,
+          pricePerGramFils: traderPriceFils,
+          owedToUs: !owedToUs,
+          note: classNote,
+        ),
+    ]);
+  }
+
+  /// بدل: ذهب يُستلم من الطرف و/أو يُسلَّم له من الشنطة، بأجور على الغرام.
+  ///
+  /// الأجور على القائم المستلم (أو المسلَّم إن لم يُستلم شيء).
+  /// [feeForUs] صحيح = الأجور لنا عليه، خطأ = علينا له.
+  /// ما لا يُسلَّم الآن يبقى في رصيد الذهب.
+  List<PostingDraft> exchange({
+    required String partyId,
+    required String bagAccountId,
+    required String makingIncomeId,
+    List<GoodsLine> received = const [],
+    List<GoodsLine> delivered = const [],
+    MoneyFils feePerGramFils = 0,
+    bool feeForUs = false,
+  }) {
+    if (received.isEmpty && delivered.isEmpty) {
+      throw ArgumentError('أدخل ذهباً مستلماً أو مسلَّماً');
+    }
+    if (feePerGramFils < 0) throw ArgumentError('المبالغ لا تكون سالبة');
+    final drafts = <PostingDraft>[
+      if (received.isNotEmpty)
+        ...scrapMove(
+            partyId: partyId,
+            bagAccountId: bagAccountId,
+            lines: received,
+            toParty: false),
+      if (delivered.isNotEmpty)
+        ...scrapMove(
+            partyId: partyId,
+            bagAccountId: bagAccountId,
+            lines: delivered,
+            toParty: true),
+    ];
+    final base = received.isNotEmpty ? received : delivered;
+    final grossMg = base.fold<int>(0, (a, l) => a + l.grossWeightMg);
+    final fee = weightValue(grossMg, feePerGramFils);
+    if (fee > 0) {
+      drafts
+        ..add(PostingDraft.cash(
+          accountId: partyId,
+          amountFils: fee,
+          debit: feeForUs,
+          note: noteExchangeFee,
+        ))
+        ..add(PostingDraft.cash(
+          accountId: makingIncomeId,
+          amountFils: fee,
+          debit: !feeForUs,
+          note: noteExchangeFee,
+        ));
+    }
+    return _checked(drafts);
+  }
+
+  /// رصيد سابق لطرف عند بدء النظام، مقابل رأس المال.
+  /// الموجب لنا عليه، والسالب له علينا — في كل دفتر على حدة.
+  List<PostingDraft> openingParty({
+    required String partyId,
+    required String capitalId,
+    WeightMg goldMg = 0,
+    MoneyFils cashFils = 0,
+  }) {
+    if (goldMg == 0 && cashFils == 0) throw ArgumentError('أدخل رصيداً');
+    return _checked([
+      if (goldMg != 0) ...[
+        PostingDraft(
+            accountId: partyId, ledger: LedgerKind.gold, amount: goldMg),
+        PostingDraft(
+            accountId: capitalId, ledger: LedgerKind.gold, amount: -goldMg),
+      ],
+      if (cashFils != 0) ...[
+        PostingDraft(
+            accountId: partyId, ledger: LedgerKind.cash, amount: cashFils),
+        PostingDraft(
+            accountId: capitalId, ledger: LedgerKind.cash, amount: -cashFils),
+      ],
+    ]);
+  }
+
+  /// ما في الشنطة عند بدء النظام: بضاعة وكسر وكاش، مقابل رأس المال.
+  /// مصنوعية البضاعة تُقيَّد على الشنطة كرأس مال مدفوع فيها، كالوارد.
+  List<PostingDraft> openingBag({
+    required String bagAccountId,
+    required String cashboxId,
+    required String capitalId,
+    List<GoodsLine> goods = const [],
+    List<GoodsLine> scrap = const [],
+    MoneyFils cashFils = 0,
+  }) {
+    if (goods.isEmpty && scrap.isEmpty && cashFils <= 0) {
+      throw ArgumentError('أدخل بضاعة أو كسراً أو كاشاً');
+    }
+    final drafts = <PostingDraft>[];
+    for (final l in [...goods, ...scrap]) {
+      drafts
+        ..add(PostingDraft.gold(
+          accountId: bagAccountId,
+          grossWeightMg: l.grossWeightMg,
+          karatId: l.karatId,
+          karatPpm: l.karatPpm,
+          debit: true,
+          itemId: l.itemId,
+          quantity: l.quantity,
+        ))
+        ..add(PostingDraft.gold(
+          accountId: capitalId,
+          grossWeightMg: l.grossWeightMg,
+          karatId: l.karatId,
+          karatPpm: l.karatPpm,
+          debit: false,
+          itemId: l.itemId,
+          quantity: l.quantity,
+        ));
+      if (l.makingFils != 0) {
+        drafts
+          ..add(PostingDraft.cash(
+              accountId: bagAccountId, amountFils: l.makingFils, debit: true))
+          ..add(PostingDraft.cash(
+              accountId: capitalId, amountFils: l.makingFils, debit: false));
+      }
+    }
+    if (cashFils > 0) {
+      drafts
+        ..add(PostingDraft.cash(
+            accountId: cashboxId, amountFils: cashFils, debit: true))
+        ..add(PostingDraft.cash(
+            accountId: capitalId, amountFils: cashFils, debit: false));
+    }
+    return _checked(drafts);
   }
 
   List<PostingDraft> _checked(List<PostingDraft> drafts) {

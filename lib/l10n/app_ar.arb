@@ -1,6 +1,5 @@
 {
   "@@locale": "ar",
-
   "appTitle": "إدارة توزيع الذهب",
   "otherLanguage": "English",
   "language": "اللغة",
@@ -13,11 +12,15 @@
   "requiredField": "هذا الحقل مطلوب",
   "invalidNumber": "رقم غير صالح",
   "genericError": "حدث خطأ: {message}",
-  "@genericError": { "placeholders": { "message": { "type": "String" } } },
-
+  "@genericError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "offlineBanner": "لا يوجد اتصال بالإنترنت — اتصل بالإنترنت لتسجيل الحركات",
   "offlineAction": "لا يمكن الحفظ بدون اتصال بالإنترنت",
-
   "loginTitle": "تسجيل الدخول",
   "loginSubtitle": "أدخل رقم هاتفك وسنرسل لك رمز التحقق برسالة نصية",
   "phoneLabel": "رقم الهاتف",
@@ -26,13 +29,25 @@
   "sendCode": "إرسال الرمز",
   "enterCode": "أدخل رمز التحقق",
   "codeSentTo": "أرسلنا رمزاً من 6 أرقام إلى {phone}",
-  "@codeSentTo": { "placeholders": { "phone": { "type": "String" } } },
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "codeLabel": "الرمز",
   "invalidCode": "الرمز يتكوّن من 6 أرقام",
   "verify": "تأكيد",
   "resendCode": "إعادة إرسال الرمز",
   "resendIn": "إعادة الإرسال بعد {seconds} ثانية",
-  "@resendIn": { "placeholders": { "seconds": { "type": "int" } } },
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "wrongCode": "الرمز غير صحيح أو انتهت صلاحيته",
   "signIn": "دخول",
   "loginSubtitleDev": "أدخل رقم هاتفك للدخول",
@@ -41,7 +56,6 @@
   "changeNumber": "تغيير الرقم",
   "signOut": "تسجيل الخروج",
   "signOutConfirm": "هل تريد تسجيل الخروج من هذا الجهاز؟",
-
   "registerTitle": "إنشاء حساب جديد",
   "registerSubtitle": "اختر نوع حسابك ثم أكمل بياناتك. يُراجَع الطلب ويُفعَّل من إدارة التطبيق.",
   "accountType": "نوع الحساب",
@@ -56,24 +70,46 @@
   "city": "المحافظة",
   "submitRequest": "إرسال طلب التسجيل",
   "chooseAccountType": "اختر نوع الحساب أولاً",
-
   "statusPending": "قيد المراجعة",
   "statusActive": "مفعّل",
   "statusSuspended": "موقوف",
   "statusRejected": "مرفوض",
   "statusPendingTitle": "طلبك قيد المراجعة",
   "statusPendingBody": "استلمنا طلب تسجيل «{org}». سيتواصل معك فريقنا لتفعيل الحساب واختيار الباقة.",
-  "@statusPendingBody": { "placeholders": { "org": { "type": "String" } } },
+  "@statusPendingBody": {
+    "placeholders": {
+      "org": {
+        "type": "String"
+      }
+    }
+  },
   "statusRejectedTitle": "لم تتم الموافقة على الطلب",
   "statusSuspendedTitle": "الحساب موقوف",
   "statusSuspendedBody": "تم إيقاف حساب «{org}». تواصل مع إدارة التطبيق.",
-  "@statusSuspendedBody": { "placeholders": { "org": { "type": "String" } } },
+  "@statusSuspendedBody": {
+    "placeholders": {
+      "org": {
+        "type": "String"
+      }
+    }
+  },
   "statusNote": "ملاحظة: {note}",
-  "@statusNote": { "placeholders": { "note": { "type": "String" } } },
+  "@statusNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
   "checkAgain": "تحقّق مجدداً",
   "contactUs": "للتواصل: {phone}",
-  "@contactUs": { "placeholders": { "phone": { "type": "String" } } },
-
+  "@contactUs": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "roleOwner": "المالك",
   "roleManager": "مسؤول",
   "roleBagHolder": "حامل شنطة",
@@ -81,7 +117,6 @@
   "roleManagerDesc": "يسلّم ويستلم ويعتمد الجرد حسب الصلاحيات الممنوحة",
   "roleBagHolderDesc": "يحمل شنطة ويؤكد ما يُسلَّم إليها",
   "roleAssistantDesc": "يسجّل الحركات فقط",
-
   "permLedgerWrite": "تسجيل الحركات",
   "permFinanceView": "رؤية الأرصدة والتقارير المالية",
   "permBagsViewAll": "رؤية كل الشنط",
@@ -89,7 +124,6 @@
   "permBagsConfirm": "تأكيد الاستلام والمرتجعات",
   "permStockCount": "طلب الجرد واعتماده",
   "permChequesManage": "إدارة الشيكات",
-
   "tabBag": "الشنطة",
   "goodsIn": "وارد بضاعة",
   "goodsInTitle": "وارد بضاعة من مشغل",
@@ -108,17 +142,38 @@
   "making": "المصنوعية",
   "addLine": "إضافة صنف آخر",
   "lineNumber": "بند {n}",
-  "@lineNumber": { "placeholders": { "n": { "type": "int" } } },
+  "@lineNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "summary": "الملخص",
   "totalPieces": "عدد القطع",
   "totalGross": "إجمالي القائم",
   "totalNet": "إجمالي الصافي عيار 24",
   "totalMaking": "إجمالي المصنوعية",
   "effectWorkshop": "يصبح للمشغل علينا: {gold} غ صافي و {cash} د.أ مصنوعية",
-  "@effectWorkshop": { "placeholders": { "gold": { "type": "String" }, "cash": { "type": "String" } } },
+  "@effectWorkshop": {
+    "placeholders": {
+      "gold": {
+        "type": "String"
+      },
+      "cash": {
+        "type": "String"
+      }
+    }
+  },
   "saveInvoice": "حفظ الفاتورة",
   "invoiceSaved": "تم حفظ الفاتورة — رقم {doc}",
-  "@invoiceSaved": { "placeholders": { "doc": { "type": "String" } } },
+  "@invoiceSaved": {
+    "placeholders": {
+      "doc": {
+        "type": "String"
+      }
+    }
+  },
   "fillLines": "أكمل الصنف والوزن في كل بند",
   "noteOptional": "ملاحظات (اختياري)",
   "date": "التاريخ",
@@ -128,7 +183,13 @@
   "bagEmptyHint": "سجّل وارد بضاعة من مشغل لتظهر هنا بالعدد والوزن.",
   "bagCapital": "رأس المال (مصنوعية)",
   "piecesCount": "{n} قطعة",
-  "@piecesCount": { "placeholders": { "n": { "type": "int" } } },
+  "@piecesCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "unknownItem": "كسر",
   "invalidWeight": "وزن غير صالح",
   "invalidAmount": "مبلغ غير صالح",
@@ -154,7 +215,13 @@
   "receivedCash": "النقد المستلم",
   "addScrap": "إضافة كسر",
   "scrapLine": "كسر {n}",
-  "@scrapLine": { "placeholders": { "n": { "type": "int" } } },
+  "@scrapLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "cashAmount": "المبلغ",
   "accountEffect": "الأثر على الحساب",
   "goldBalance": "رصيد الذهب",
@@ -162,9 +229,21 @@
   "balanceBefore": "قبل",
   "balanceAfter": "بعد",
   "owedToUs": "لنا {v}",
-  "@owedToUs": { "placeholders": { "v": { "type": "String" } } },
+  "@owedToUs": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
   "owedByUs": "له {v}",
-  "@owedByUs": { "placeholders": { "v": { "type": "String" } } },
+  "@owedByUs": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
   "settledZero": "صفر",
   "emptyTx": "أدخل بضاعة أو كسراً أو مبلغاً",
   "saveTx": "حفظ الحركة",
@@ -175,9 +254,33 @@
   "cashChange": "نقد",
   "bagNotEnough": "{item} {karat}: في الشنطة {have} غ فقط",
   "bagNotEnoughCount": "{item} {karat}: في الشنطة {have} قطعة فقط",
-  "@bagNotEnoughCount": { "placeholders": { "item": { "type": "String" }, "karat": { "type": "String" }, "have": { "type": "int" } } },
+  "@bagNotEnoughCount": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "karat": {
+        "type": "String"
+      },
+      "have": {
+        "type": "int"
+      }
+    }
+  },
   "saleExceedsBag": "لا يمكن بيع أكثر مما في الشنطة:",
-  "@bagNotEnough": { "placeholders": { "item": { "type": "String" }, "karat": { "type": "String" }, "have": { "type": "String" } } },
+  "@bagNotEnough": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "karat": {
+        "type": "String"
+      },
+      "have": {
+        "type": "String"
+      }
+    }
+  },
   "onlyHolderSells": "هذه الشنطة يبيع منها حاملها فقط",
   "product": "المنتج",
   "pickFromBag": "اختر من الشنطة — اضغط على المنتج لإضافته",
@@ -217,7 +320,16 @@
   "bank": "البنك",
   "dueDate": "تاريخ الاستحقاق",
   "bagScrapNotEnough": "{karat}: في الشنطة {have} غ كسر فقط",
-  "@bagScrapNotEnough": { "placeholders": { "karat": { "type": "String" }, "have": { "type": "String" } } },
+  "@bagScrapNotEnough": {
+    "placeholders": {
+      "karat": {
+        "type": "String"
+      },
+      "have": {
+        "type": "String"
+      }
+    }
+  },
   "scrapExceedsBag": "لا يمكن تسليم كسر أكثر مما في الشنطة:",
   "supplier": "المورّد (مشغل / تاجر)",
   "newKarat": "عيار جديد",
@@ -233,7 +345,7 @@
   "goldLines": "الذهب / الكسر",
   "netTotal": "الصافي (حلة)",
   "karatAndFactor": "العيار والمعامل",
-  "otherFactor": "معامل آخر…",
+  "otherFactor": "عيار لحظي (لهذه العملية فقط)…",
   "tabDistributors": "الموزّعون",
   "tabReceivables": "الذمم",
   "tabCompany": "الشركة الدولية",
@@ -249,7 +361,6 @@
   "tabSuppliers": "الموردون",
   "tabShowcase": "الفترينة",
   "tabCustomers": "الزبائن",
-
   "nextPhaseTitle": "قيد البناء — المرحلة التالية",
   "phFactoryHome": "ملخص المصنع: رصيد كل شنطة، الحركات بانتظار التأكيد، وآخر جرد.",
   "phTransfers": "تسليم البضاعة للشنط واستلام الكسر والمرتجعات. كل حركة تنتظر تأكيد الطرف الآخر قبل أن تدخل الأرصدة.",
@@ -258,7 +369,6 @@
   "phMyBag": "رصيد شنطتك وحركاتها مع المحلات.",
   "phSuppliers": "دفاتر الموزّعين والمصانع الذين تتعامل معهم.",
   "phShowcase": "الذهب المعروض في الفترينة والعهدة لكل مورّد.",
-
   "myAccount": "حسابي",
   "currentAccount": "الحساب الحالي",
   "switchAccount": "تبديل الحساب",
@@ -270,21 +380,40 @@
   "adminDashboard": "لوحة الإدارة",
   "registerAnotherOrg": "تسجيل حساب آخر",
   "registerAnotherOrgDesc": "مثلاً حساب مستقل إلى جانب عضويتك في مصنع",
-
   "planLabel": "الباقة",
   "endsOn": "ينتهي في",
   "noExpiry": "بلا تاريخ انتهاء",
   "daysLeft": "متبقٍّ {days} يوم",
-  "@daysLeft": { "placeholders": { "days": { "type": "int" } } },
+  "@daysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "usersLimit": "المستخدمون",
   "bagsLimit": "الشنط",
   "renewHint": "للتجديد أو تغيير الباقة تواصل مع إدارة التطبيق.",
   "subscriptionExpiring": "ينتهي اشتراكك خلال {days} يوم",
-  "@subscriptionExpiring": { "placeholders": { "days": { "type": "int" } } },
+  "@subscriptionExpiring": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "subscriptionExpired": "انتهى الاشتراك — الحساب للقراءة فقط حتى التجديد",
-
   "seatsUsed": "{used} من {max} مستخدمين",
-  "@seatsUsed": { "placeholders": { "used": { "type": "int" }, "max": { "type": "int" } } },
+  "@seatsUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "inviteMember": "إضافة عضو",
   "pendingInvitations": "دعوات بانتظار أول دخول",
   "invitationHint": "ينضم تلقائياً عند أول دخول برقمه",
@@ -300,9 +429,17 @@
   "you": "(أنت)",
   "ownerOnly": "هذه الصفحة للمالك فقط",
   "ownerHasAll": "المالك يملك كل الصلاحيات",
-
   "bagsUsed": "{used} من {max} شنط",
-  "@bagsUsed": { "placeholders": { "used": { "type": "int" }, "max": { "type": "int" } } },
+  "@bagsUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "newBag": "شنطة جديدة",
   "bagName": "اسم الشنطة",
   "bagHolder": "حامل الشنطة",
@@ -310,7 +447,6 @@
   "bagActive": "الشنطة فعّالة",
   "editBag": "تعديل الشنطة",
   "noBags": "لا توجد شنط",
-
   "adminOverview": "نظرة عامة",
   "adminOrgs": "المنشآت",
   "adminPlans": "الباقات",
@@ -325,7 +461,13 @@
   "searchOrgs": "ابحث بالاسم أو الهاتف",
   "all": "الكل",
   "membersCount": "{count} أعضاء",
-  "@membersCount": { "placeholders": { "count": { "type": "int" } } },
+  "@membersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "activate": "تفعيل",
   "renew": "تجديد",
   "suspend": "إيقاف",
@@ -333,7 +475,13 @@
   "reactivate": "إعادة التفعيل",
   "months": "المدة",
   "monthsCount": "{count} شهر",
-  "@monthsCount": { "placeholders": { "count": { "type": "int" } } },
+  "@monthsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "note": "ملاحظة",
   "addMemberByPhone": "إضافة عضو برقم الهاتف",
   "createdAt": "تاريخ التسجيل",
@@ -352,7 +500,16 @@
   "extraBagPrice": "سعر الشنطة الإضافية (د.أ)",
   "planActive": "الباقة متاحة",
   "perPeriod": "{price} د.أ / {months} شهر",
-  "@perPeriod": { "placeholders": { "price": { "type": "String" }, "months": { "type": "int" } } },
+  "@perPeriod": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
   "priceNotSet": "السعر غير محدد",
   "noResults": "لا نتائج",
   "accountStatement": "كشف حساب",
@@ -378,7 +535,13 @@
   "txIsReversed": "هذه الحركة ملغاة بقيد عكسي، ولا أثر لها على الأرصدة.",
   "txIsReversal": "هذا قيد عكسي ألغى حركة سابقة.",
   "needMigration12": "يلزم تنفيذ ملف 0012_void_cheque.sql في Supabase أولاً",
-  "@txCancelledDoc": { "placeholders": { "doc": { "type": "String" } } },
+  "@txCancelledDoc": {
+    "placeholders": {
+      "doc": {
+        "type": "String"
+      }
+    }
+  },
   "partialReturn": "مرتجع جزئي",
   "returnFromShopHint": "القطع المرتجعة تعود إلى الشنطة، وينقص عن المحل ذهبها الصافي ومصنوعيتها بنفس سعر الفاتورة.",
   "returnToWorkshopHint": "القطع المرتجعة تخرج من الشنطة إلى المشغل، وينقص ما له علينا ذهباً ومصنوعيةً بنفس سعر الفاتورة.",
@@ -392,8 +555,23 @@
   "returnedGoods": "البضاعة المرتجعة",
   "saveReturn": "حفظ المرتجع",
   "invoiceLines": "بنود الفاتورة",
-  "@maxReturn": {"placeholders": {"count": {"type": "String"}, "grams": {"type": "String"}}},
-  "@returnSaved": {"placeholders": {"doc": {"type": "String"}}},
+  "@maxReturn": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "@returnSaved": {
+    "placeholders": {
+      "doc": {
+        "type": "String"
+      }
+    }
+  },
   "bagEditionSubtitle": "نسخة تاجر الشنطة — ادخل برقم هاتفك وكلمة المرور",
   "passwordLabel": "كلمة المرور",
   "showPassword": "إظهار كلمة المرور",
@@ -412,11 +590,20 @@
   "accountsBySupport": "إضافة حساب أو تغيير كلمة مرور أو إيقاف حساب يتم من الدعم. اضغط على حساب لتعديل صلاحياته.",
   "appSection": "التطبيق",
   "aboutEdition": "عن النسخة",
-  "editionVersion": "نسخة تاجر الشنطة · 1.1.1",
+  "editionVersion": "نسخة تاجر الشنطة · 1.2.0",
   "support": "الدعم",
   "edit": "تعديل",
   "needMigration13": "يلزم تنفيذ ملف 0013_bag_edition.sql في Supabase أولاً",
-  "@accountsUsed": {"placeholders": {"count": {"type": "int"}, "max": {"type": "int"}}},
+  "@accountsUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "welcome": "أهلاً بك",
   "welcomeName": "أهلاً، {name}",
   "noTradersYet": "لا يوجد تجار بعد — أضف تاجراً من تبويب التجار",
@@ -435,7 +622,13 @@
   "chequesOverdue": "شيكات متأخرة",
   "chequesThisWeek": "تستحق هذا الأسبوع",
   "recentMovements": "آخر الحركات",
-  "@welcomeName": {"placeholders": {"name": {"type": "String"}}},
+  "@welcomeName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "reports": "التقارير",
   "accountStatements": "كشوفات الحسابات",
   "shopStatement": "كشف حساب محل",
@@ -523,9 +716,122 @@
   "expenseCategory": "البند",
   "expenseNoteRequired": "الوصف (إلزامي)",
   "expenseHint": "يُخصم المبلغ من كاش الشنطة ويظهر في مصاريف اليوم وتقاريره.",
-  "@goodMorningName": {"placeholders": {"name": {"type": "String"}}},
-  "@cashAddedNote": {"placeholders": {"amount": {"type": "String"}}},
-  "@cashTakenNote": {"placeholders": {"amount": {"type": "String"}}},
-  "@cashShortage": {"placeholders": {"amount": {"type": "String"}}},
-  "@cashSurplus": {"placeholders": {"amount": {"type": "String"}}}
+  "@goodMorningName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@cashAddedNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cashTakenNote": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cashShortage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cashSurplus": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "instantKarat": "عيار لحظي",
+  "makingPerPiece": "المصنوعية / قطعة",
+  "perGram": "على الغرام",
+  "perPiece": "على القطعة",
+  "makingDiscount": "خصم المصنوعية",
+  "noDiscount": "بلا خصم",
+  "dropFraction": "حذف الكسر",
+  "extraDiscount": "خصم إضافي",
+  "finalMaking": "المصنوعية النهائية",
+  "recoveredGoods": "المسترد من المحل",
+  "recoveredMaking": "مصنوعية المسترد",
+  "addRecovered": "إضافة مسترد",
+  "dailyCashTotal": "مجموع الكاش اليومي",
+  "dailyCashHint": "كاش بداية اليوم + المقبوض",
+  "netCash": "الكاش الصافي",
+  "fixClass": "تصنيف التسكير",
+  "fixClassGold": "حلة",
+  "fixClassScrap": "كسر",
+  "fixCashNow": "نقد الآن (اختياري)",
+  "fixCashHint": "كله أو جزء منه أو صفر — والباقي يبقى ذمة.",
+  "fixWithTrader": "تسكير مع تاجر (اختياري)",
+  "noTrader": "بدون تاجر",
+  "traderGrams": "غرامات التاجر",
+  "traderFixHint": "فارغة = نفس غرامات المحل وسعره.",
+  "opReceiveGold": "استلام ذهب",
+  "opReceiveGoldDesc": "يدخل الشنطة بأي عيار، ومعامله 1.000 ويمكن تعديله",
+  "opDeliverGold": "تسليم ذهب",
+  "opDeliverGoldDesc": "يخرج من الشنطة بأي عيار، ومعامله 1.000 ويمكن تعديله",
+  "opLira": "بيع ليرة مع الأجور",
+  "opLiraDesc": "وزن قائم، والأجور على القطعة لنا",
+  "opExchange": "بدل ذهب",
+  "opExchangeDesc": "استلام وتسليم بأجور على الغرام، لنا أو علينا",
+  "liraFromBag": "تخرج من الشنطة",
+  "liraFromBagHint": "فعّله إذا كانت الليرة من مخزون الشنطة.",
+  "liraFee": "الأجور / قطعة",
+  "liraCountNeeded": "أدخل العدد لحساب الأجور.",
+  "exchangeReceived": "الذهب المستلم",
+  "exchangeDelivered": "الذهب المسلَّم (اختياري)",
+  "exchangeDeliveredHint": "ما لا يُسلَّم الآن يبقى في الرصيد.",
+  "exchangeFee": "أجور البدل",
+  "exchangeFeePerGram": "الأجور / غرام",
+  "feeForUs": "لنا",
+  "feeOnUs": "علينا",
+  "openingBalances": "الأرصدة الافتتاحية",
+  "openingBalancesHint": "حسابات سابقة للمحلات والتجار والمشاغل، ومحتوى الشنطة",
+  "openingBag": "محتوى الشنطة عند البدء",
+  "openingBagHint": "البضاعة والكسر والكاش الموجود الآن",
+  "openingGold": "رصيد الذهب (صافي 24)",
+  "openingCash": "رصيد النقد",
+  "openingForUs": "لنا عليه",
+  "openingForHim": "له علينا",
+  "openingSaved": "تم تسجيل الرصيد — {doc}",
+  "bagMovements": "الحركات",
+  "allMovements": "الكل",
+  "movementsIn": "وارد للشنطة",
+  "movementsOut": "صادر من الشنطة",
+  "noBagMovements": "لا توجد حركات في هذه الفترة",
+  "lastMakingHint": "آخر مصنوعية لهذا المحل: {rate} {unit} — يمكن تعديلها",
+  "recoveredLine": "مسترد {n}",
+  "@openingSaved": {
+    "placeholders": {
+      "doc": {
+        "type": "String"
+      }
+    }
+  },
+  "@lastMakingHint": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@recoveredLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

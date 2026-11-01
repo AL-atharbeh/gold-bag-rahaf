@@ -6,6 +6,7 @@ import '../../app/theme.dart';
 import '../../core/locale.dart';
 import '../../core/units.dart';
 import '../../domain/enums.dart';
+import '../../domain/ledger.dart';
 import '../../domain/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform/labels.dart';
@@ -37,7 +38,8 @@ class PartyLedgerPage extends ConsumerWidget {
   final Account account;
 
   Future<void> _newMovement(BuildContext context, WidgetRef ref) async {
-    if (account.kind == AccountKind.trader) {
+    if (account.kind == AccountKind.trader ||
+        account.kind == AccountKind.factory) {
       await showTraderOps(context, account);
       return;
     }
@@ -222,7 +224,9 @@ class _MovementTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  s.txType.label,
+                  s.note == noteFixGold || s.note == noteFixScrap
+                      ? s.note!
+                      : s.txType.label,
                   style: TextStyle(
                       fontWeight: FontWeight.w800, decoration: strike),
                 ),

@@ -1,5 +1,6 @@
 import '../../core/units.dart';
 import '../../domain/enums.dart';
+import '../../domain/ledger.dart';
 import '../../domain/models.dart';
 
 /// حركة واحدة في كشف الحساب — مجموع سطورها في الدفترين، والرصيد بعدها.
@@ -19,6 +20,12 @@ class StatementRow {
   String get docNumber => first.docNumber;
   TxType get type => first.txType;
   bool get isReversed => first.isReversed;
+
+  /// تصنيف التسكير إن وُجد: حلة أو كسر.
+  String? get fixClass =>
+      first.note == noteFixGold || first.note == noteFixScrap
+          ? first.note
+          : null;
 }
 
 /// كشف حساب طرف لفترة: الرصيد السابق أولاً، ثم حركات الفترة، ثم الرصيد الختامي.

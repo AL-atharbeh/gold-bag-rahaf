@@ -106,12 +106,83 @@ abstract class GoldRepository {
     required String makingIncomeId,
     List<GoodsLine> goods = const [],
     List<GoodsLine> scrap = const [],
+    List<GoodsLine> recovered = const [],
     int cashReceivedFils = 0,
     int costOutFils = 0,
+    int costBackFils = 0,
+    int makingDiscountFils = 0,
     DateTime? occurredAt,
     String? note,
   }) =>
       throw UnimplementedError('shopSale غير مدعوم في هذا المستودع');
+
+  /// آخر مصنوعية بيع لكل صنف وعيار عند هذا الطرف.
+  Future<Map<String, LastMaking>> lastMakings(String partyId) =>
+      throw UnimplementedError('lastMakings غير مدعوم في هذا المستودع');
+
+  /// تسكير مع دفعة نقدية اختيارية وتسكير مقابل مع تاجر.
+  Future<String> fix({
+    required String partyId,
+    required String tradingIncomeId,
+    required String cashboxId,
+    required int netWeightMg,
+    required int pricePerGramFils,
+    required bool owedToUs,
+    int cashFils = 0,
+    String? traderId,
+    int traderNetMg = 0,
+    int traderPriceFils = 0,
+    String? classNote,
+    DateTime? occurredAt,
+    String? note,
+  }) =>
+      throw UnimplementedError('fix غير مدعوم في هذا المستودع');
+
+  /// بدل ذهب بأجور على الغرام.
+  Future<String> exchange({
+    required String partyId,
+    required String bagAccountId,
+    required String makingIncomeId,
+    List<GoodsLine> received = const [],
+    List<GoodsLine> delivered = const [],
+    int feePerGramFils = 0,
+    bool feeForUs = false,
+    DateTime? occurredAt,
+    String? note,
+  }) =>
+      throw UnimplementedError('exchange غير مدعوم في هذا المستودع');
+
+  /// سحب موظف من كاش الشنطة: يُخصم من راتبه ويُحسب ضمن مصاريف اليوم.
+  Future<String> employeeDraw({
+    required String employeeId,
+    required String cashboxId,
+    required int amountFils,
+    DateTime? occurredAt,
+    String? note,
+  }) =>
+      throw UnimplementedError('employeeDraw غير مدعوم في هذا المستودع');
+
+  /// رصيد سابق لطرف عند بدء النظام.
+  Future<String> openingParty({
+    required String partyId,
+    required String capitalId,
+    int goldMg = 0,
+    int cashFils = 0,
+    DateTime? occurredAt,
+  }) =>
+      throw UnimplementedError('openingParty غير مدعوم في هذا المستودع');
+
+  /// ما في الشنطة عند بدء النظام.
+  Future<String> openingBag({
+    required String bagAccountId,
+    required String cashboxId,
+    required String capitalId,
+    List<GoodsLine> goods = const [],
+    List<GoodsLine> scrap = const [],
+    int cashFils = 0,
+    DateTime? occurredAt,
+  }) =>
+      throw UnimplementedError('openingBag غير مدعوم في هذا المستودع');
 
   /// مرتجع جزئي من فاتورة بيع لمحل أو وارد من مشغل.
   Future<String> goodsReturn({
@@ -223,18 +294,15 @@ abstract class GoldRepository {
     DateTime? occurredAt,
     String? note,
   });
-  Future<String> retailSale({
-    required String customerId,
-    required String inventoryAccountId,
-    required String incomeAccountId,
-    required int totalFils,
-    required List<GoodsLine> lines,
-    int paidFils = 0,
-    String? cashboxId,
-    DateTime? occurredAt,
-    String? note,
-  });
   Future<String> reverse(String txId, {String? reason});
+}
+
+/// آخر مصنوعية بيعت بها قطعة لطرف: السعر، وهل هو للقطعة.
+class LastMaking {
+  const LastMaking(this.rateFils, this.perPiece);
+
+  final int rateFils;
+  final bool perPiece;
 }
 
 /// بيانات شيك مرافق لدفعة نقدية.

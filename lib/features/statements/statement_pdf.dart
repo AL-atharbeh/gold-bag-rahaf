@@ -8,6 +8,7 @@ import '../../core/units.dart';
 import '../../domain/models.dart';
 import '../../platform/labels.dart';
 import '../pdf/pdf_kit.dart';
+import '../../domain/ledger.dart';
 import 'account_statement.dart';
 
 /// نصوص الكشف بلغته — مستقلة عن لغة الواجهة.
@@ -118,6 +119,11 @@ Future<Uint8List> buildStatementPdf({
           pdfCell(
             [
               pdfTxType(r.type, arabic) +
+                  (r.fixClass == noteFixScrap
+                      ? (arabic ? ' — كسر' : ' — scrap')
+                      : r.fixClass == noteFixGold
+                          ? (arabic ? ' — حلة' : ' — gold')
+                          : '') +
                   (r.isReversed ? ' (${t.reversed})' : ''),
               for (final e in r.grossByKarat.entries)
                 '${e.key.isEmpty ? '' : '${pdfKarat(e.key, arabic)}: '}${formatGrams(e.value)} ${t.gramsUnit}',

@@ -380,9 +380,14 @@ class _CloseDayPageState extends ConsumerState<CloseDayPage> {
                                     null
                                   ),
                                 (
-                                  l.makingProfit,
-                                  '${formatDinars(d.makingProfitFils)} $jd',
-                                  '${l.afterExpenses}: ${formatDinars(d.netProfitFils)}'
+                                  l.dailyCashTotal,
+                                  '${formatDinars(expected + d.cashOutFils)} $jd',
+                                  l.dailyCashHint
+                                ),
+                                (
+                                  l.netCash,
+                                  '${formatDinars(expected)} $jd',
+                                  null
                                 ),
                               ]),
                               if (d.expenses.isNotEmpty) ...[

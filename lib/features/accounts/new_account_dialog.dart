@@ -8,7 +8,10 @@ import '../common/inputs.dart';
 
 /// إضافة طرف جديد.
 class NewAccountDialog extends ConsumerStatefulWidget {
-  const NewAccountDialog({super.key, this.kind});
+  const NewAccountDialog({super.key, this.kind, this.withWorkshop = false});
+
+  /// صفحة التجار: اختيار بين تاجر ومشغل.
+  final bool withWorkshop;
 
   /// نوع ثابت حين تُفتح من صفحة المحلات أو التجار أو المشاغل — لا اختيار.
   final AccountKind? kind;
@@ -103,7 +106,26 @@ class _NewAccountDialogState extends ConsumerState<NewAccountDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (widget.kind == null)
+                if (widget.withWorkshop)
+                  SegmentedButton<AccountKind>(
+                    segments: const [
+                      ButtonSegment(
+                        value: AccountKind.trader,
+                        label: Text('تاجر ذهب'),
+                        icon: Icon(Icons.person_rounded, size: 16),
+                      ),
+                      ButtonSegment(
+                        value: AccountKind.factory,
+                        label: Text('مشغل / مصنع'),
+                        icon: Icon(Icons.precision_manufacturing_rounded,
+                            size: 16),
+                      ),
+                    ],
+                    selected: {_kind},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (s) => setState(() => _kind = s.first),
+                  )
+                else if (widget.kind == null)
                   SegmentedButton<AccountKind>(
                     segments: const [
                       ButtonSegment(

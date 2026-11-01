@@ -67,6 +67,7 @@ List<ShellTab> tabsFor(Membership m) => [
         label: (l) => l.tabTraders,
         page: (l) => AccountsPage(
           kind: AccountKind.trader,
+          withWorkshops: true,
           title: l.tabTraders,
           addLabel: l.newTrader,
           emptyTitle: l.noTraders,

@@ -1349,7 +1349,7 @@ abstract class AppLocalizations {
   /// No description provided for @otherFactor.
   ///
   /// In ar, this message translates to:
-  /// **'معامل آخر…'**
+  /// **'عيار لحظي (لهذه العملية فقط)…'**
   String get otherFactor;
 
   /// No description provided for @tabDistributors.
@@ -2327,7 +2327,7 @@ abstract class AppLocalizations {
   /// No description provided for @editionVersion.
   ///
   /// In ar, this message translates to:
-  /// **'نسخة تاجر الشنطة · 1.1.1'**
+  /// **'نسخة تاجر الشنطة · 1.2.0'**
   String get editionVersion;
 
   /// No description provided for @support.
@@ -2977,6 +2977,360 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'يُخصم المبلغ من كاش الشنطة ويظهر في مصاريف اليوم وتقاريره.'**
   String get expenseHint;
+
+  /// No description provided for @instantKarat.
+  ///
+  /// In ar, this message translates to:
+  /// **'عيار لحظي'**
+  String get instantKarat;
+
+  /// No description provided for @makingPerPiece.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصنوعية / قطعة'**
+  String get makingPerPiece;
+
+  /// No description provided for @perGram.
+  ///
+  /// In ar, this message translates to:
+  /// **'على الغرام'**
+  String get perGram;
+
+  /// No description provided for @perPiece.
+  ///
+  /// In ar, this message translates to:
+  /// **'على القطعة'**
+  String get perPiece;
+
+  /// No description provided for @makingDiscount.
+  ///
+  /// In ar, this message translates to:
+  /// **'خصم المصنوعية'**
+  String get makingDiscount;
+
+  /// No description provided for @noDiscount.
+  ///
+  /// In ar, this message translates to:
+  /// **'بلا خصم'**
+  String get noDiscount;
+
+  /// No description provided for @dropFraction.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الكسر'**
+  String get dropFraction;
+
+  /// No description provided for @extraDiscount.
+  ///
+  /// In ar, this message translates to:
+  /// **'خصم إضافي'**
+  String get extraDiscount;
+
+  /// No description provided for @finalMaking.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصنوعية النهائية'**
+  String get finalMaking;
+
+  /// No description provided for @recoveredGoods.
+  ///
+  /// In ar, this message translates to:
+  /// **'المسترد من المحل'**
+  String get recoveredGoods;
+
+  /// No description provided for @recoveredMaking.
+  ///
+  /// In ar, this message translates to:
+  /// **'مصنوعية المسترد'**
+  String get recoveredMaking;
+
+  /// No description provided for @addRecovered.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة مسترد'**
+  String get addRecovered;
+
+  /// No description provided for @dailyCashTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'مجموع الكاش اليومي'**
+  String get dailyCashTotal;
+
+  /// No description provided for @dailyCashHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'كاش بداية اليوم + المقبوض'**
+  String get dailyCashHint;
+
+  /// No description provided for @netCash.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكاش الصافي'**
+  String get netCash;
+
+  /// No description provided for @fixClass.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصنيف التسكير'**
+  String get fixClass;
+
+  /// No description provided for @fixClassGold.
+  ///
+  /// In ar, this message translates to:
+  /// **'حلة'**
+  String get fixClassGold;
+
+  /// No description provided for @fixClassScrap.
+  ///
+  /// In ar, this message translates to:
+  /// **'كسر'**
+  String get fixClassScrap;
+
+  /// No description provided for @fixCashNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'نقد الآن (اختياري)'**
+  String get fixCashNow;
+
+  /// No description provided for @fixCashHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'كله أو جزء منه أو صفر — والباقي يبقى ذمة.'**
+  String get fixCashHint;
+
+  /// No description provided for @fixWithTrader.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسكير مع تاجر (اختياري)'**
+  String get fixWithTrader;
+
+  /// No description provided for @noTrader.
+  ///
+  /// In ar, this message translates to:
+  /// **'بدون تاجر'**
+  String get noTrader;
+
+  /// No description provided for @traderGrams.
+  ///
+  /// In ar, this message translates to:
+  /// **'غرامات التاجر'**
+  String get traderGrams;
+
+  /// No description provided for @traderFixHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'فارغة = نفس غرامات المحل وسعره.'**
+  String get traderFixHint;
+
+  /// No description provided for @opReceiveGold.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام ذهب'**
+  String get opReceiveGold;
+
+  /// No description provided for @opReceiveGoldDesc.
+  ///
+  /// In ar, this message translates to:
+  /// **'يدخل الشنطة بأي عيار، ومعامله 1.000 ويمكن تعديله'**
+  String get opReceiveGoldDesc;
+
+  /// No description provided for @opDeliverGold.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسليم ذهب'**
+  String get opDeliverGold;
+
+  /// No description provided for @opDeliverGoldDesc.
+  ///
+  /// In ar, this message translates to:
+  /// **'يخرج من الشنطة بأي عيار، ومعامله 1.000 ويمكن تعديله'**
+  String get opDeliverGoldDesc;
+
+  /// No description provided for @opLira.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيع ليرة مع الأجور'**
+  String get opLira;
+
+  /// No description provided for @opLiraDesc.
+  ///
+  /// In ar, this message translates to:
+  /// **'وزن قائم، والأجور على القطعة لنا'**
+  String get opLiraDesc;
+
+  /// No description provided for @opExchange.
+  ///
+  /// In ar, this message translates to:
+  /// **'بدل ذهب'**
+  String get opExchange;
+
+  /// No description provided for @opExchangeDesc.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام وتسليم بأجور على الغرام، لنا أو علينا'**
+  String get opExchangeDesc;
+
+  /// No description provided for @liraFromBag.
+  ///
+  /// In ar, this message translates to:
+  /// **'تخرج من الشنطة'**
+  String get liraFromBag;
+
+  /// No description provided for @liraFromBagHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'فعّله إذا كانت الليرة من مخزون الشنطة.'**
+  String get liraFromBagHint;
+
+  /// No description provided for @liraFee.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأجور / قطعة'**
+  String get liraFee;
+
+  /// No description provided for @liraCountNeeded.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل العدد لحساب الأجور.'**
+  String get liraCountNeeded;
+
+  /// No description provided for @exchangeReceived.
+  ///
+  /// In ar, this message translates to:
+  /// **'الذهب المستلم'**
+  String get exchangeReceived;
+
+  /// No description provided for @exchangeDelivered.
+  ///
+  /// In ar, this message translates to:
+  /// **'الذهب المسلَّم (اختياري)'**
+  String get exchangeDelivered;
+
+  /// No description provided for @exchangeDeliveredHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما لا يُسلَّم الآن يبقى في الرصيد.'**
+  String get exchangeDeliveredHint;
+
+  /// No description provided for @exchangeFee.
+  ///
+  /// In ar, this message translates to:
+  /// **'أجور البدل'**
+  String get exchangeFee;
+
+  /// No description provided for @exchangeFeePerGram.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأجور / غرام'**
+  String get exchangeFeePerGram;
+
+  /// No description provided for @feeForUs.
+  ///
+  /// In ar, this message translates to:
+  /// **'لنا'**
+  String get feeForUs;
+
+  /// No description provided for @feeOnUs.
+  ///
+  /// In ar, this message translates to:
+  /// **'علينا'**
+  String get feeOnUs;
+
+  /// No description provided for @openingBalances.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأرصدة الافتتاحية'**
+  String get openingBalances;
+
+  /// No description provided for @openingBalancesHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسابات سابقة للمحلات والتجار والمشاغل، ومحتوى الشنطة'**
+  String get openingBalancesHint;
+
+  /// No description provided for @openingBag.
+  ///
+  /// In ar, this message translates to:
+  /// **'محتوى الشنطة عند البدء'**
+  String get openingBag;
+
+  /// No description provided for @openingBagHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'البضاعة والكسر والكاش الموجود الآن'**
+  String get openingBagHint;
+
+  /// No description provided for @openingGold.
+  ///
+  /// In ar, this message translates to:
+  /// **'رصيد الذهب (صافي 24)'**
+  String get openingGold;
+
+  /// No description provided for @openingCash.
+  ///
+  /// In ar, this message translates to:
+  /// **'رصيد النقد'**
+  String get openingCash;
+
+  /// No description provided for @openingForUs.
+  ///
+  /// In ar, this message translates to:
+  /// **'لنا عليه'**
+  String get openingForUs;
+
+  /// No description provided for @openingForHim.
+  ///
+  /// In ar, this message translates to:
+  /// **'له علينا'**
+  String get openingForHim;
+
+  /// No description provided for @openingSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تسجيل الرصيد — {doc}'**
+  String openingSaved(String doc);
+
+  /// No description provided for @bagMovements.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحركات'**
+  String get bagMovements;
+
+  /// No description provided for @allMovements.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكل'**
+  String get allMovements;
+
+  /// No description provided for @movementsIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'وارد للشنطة'**
+  String get movementsIn;
+
+  /// No description provided for @movementsOut.
+  ///
+  /// In ar, this message translates to:
+  /// **'صادر من الشنطة'**
+  String get movementsOut;
+
+  /// No description provided for @noBagMovements.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد حركات في هذه الفترة'**
+  String get noBagMovements;
+
+  /// No description provided for @lastMakingHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر مصنوعية لهذا المحل: {rate} {unit} — يمكن تعديلها'**
+  String lastMakingHint(String rate, String unit);
+
+  /// No description provided for @recoveredLine.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسترد {n}'**
+  String recoveredLine(int n);
 }
 
 class _AppLocalizationsDelegate

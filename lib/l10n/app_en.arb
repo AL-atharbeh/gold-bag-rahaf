@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-
   "appTitle": "Gold Distribution Manager",
   "otherLanguage": "العربية",
   "language": "Language",
@@ -13,10 +12,8 @@
   "requiredField": "This field is required",
   "invalidNumber": "Invalid number",
   "genericError": "Something went wrong: {message}",
-
   "offlineBanner": "No internet connection — connect to record transactions",
   "offlineAction": "Can't save without an internet connection",
-
   "loginTitle": "Sign in",
   "loginSubtitle": "Enter your phone number and we'll text you a verification code",
   "phoneLabel": "Phone number",
@@ -38,7 +35,6 @@
   "changeNumber": "Change number",
   "signOut": "Sign out",
   "signOutConfirm": "Sign out from this device?",
-
   "registerTitle": "Create a new account",
   "registerSubtitle": "Choose your account type and fill in your details. The app team reviews and activates every request.",
   "accountType": "Account type",
@@ -53,7 +49,6 @@
   "city": "Governorate",
   "submitRequest": "Submit registration",
   "chooseAccountType": "Choose an account type first",
-
   "statusPending": "Pending",
   "statusActive": "Active",
   "statusSuspended": "Suspended",
@@ -66,7 +61,6 @@
   "statusNote": "Note: {note}",
   "checkAgain": "Check again",
   "contactUs": "Contact: {phone}",
-
   "roleOwner": "Owner",
   "roleManager": "Manager",
   "roleBagHolder": "Bag holder",
@@ -74,7 +68,6 @@
   "roleManagerDesc": "Issues, receives and approves stock counts as permitted",
   "roleBagHolderDesc": "Carries a bag and confirms what is issued to it",
   "roleAssistantDesc": "Records transactions only",
-
   "permLedgerWrite": "Record transactions",
   "permFinanceView": "View balances & financial reports",
   "permBagsViewAll": "View all bags",
@@ -82,7 +75,6 @@
   "permBagsConfirm": "Confirm receipts & returns",
   "permStockCount": "Request & approve stock counts",
   "permChequesManage": "Manage cheques",
-
   "tabBag": "Bag",
   "goodsIn": "Goods in",
   "goodsInTitle": "Goods in from workshop",
@@ -216,7 +208,7 @@
   "goldLines": "Gold / scrap",
   "netTotal": "Net (24K)",
   "karatAndFactor": "Karat & factor",
-  "otherFactor": "Other factor…",
+  "otherFactor": "Instant karat (this operation only)…",
   "tabDistributors": "Distributors",
   "tabReceivables": "Receivables",
   "tabCompany": "International Co.",
@@ -232,7 +224,6 @@
   "tabSuppliers": "Suppliers",
   "tabShowcase": "Showcase",
   "tabCustomers": "Customers",
-
   "nextPhaseTitle": "Under construction — next phase",
   "phFactoryHome": "Factory summary: each bag's balance, transactions awaiting confirmation and the latest stock count.",
   "phTransfers": "Issue goods to bags and receive scrap and returns. Each transfer waits for the other side's confirmation before it hits the balances.",
@@ -241,7 +232,6 @@
   "phMyBag": "Your bag's balance and its transactions with shops.",
   "phSuppliers": "Ledgers of the distributors and factories you deal with.",
   "phShowcase": "Gold on display and on consignment per supplier.",
-
   "myAccount": "My account",
   "currentAccount": "Current account",
   "switchAccount": "Switch account",
@@ -253,7 +243,6 @@
   "adminDashboard": "Admin dashboard",
   "registerAnotherOrg": "Register another account",
   "registerAnotherOrgDesc": "e.g. an independent account alongside your factory membership",
-
   "planLabel": "Plan",
   "endsOn": "Ends on",
   "noExpiry": "No expiry date",
@@ -263,7 +252,6 @@
   "renewHint": "To renew or change your plan, contact the app team.",
   "subscriptionExpiring": "Your subscription ends in {days} days",
   "subscriptionExpired": "Subscription expired — read-only until renewed",
-
   "seatsUsed": "{used} of {max} users",
   "inviteMember": "Add member",
   "pendingInvitations": "Invitations awaiting first sign-in",
@@ -280,7 +268,6 @@
   "you": "(you)",
   "ownerOnly": "This page is for the owner only",
   "ownerHasAll": "The owner has every permission",
-
   "bagsUsed": "{used} of {max} bags",
   "newBag": "New bag",
   "bagName": "Bag name",
@@ -289,7 +276,6 @@
   "bagActive": "Bag active",
   "editBag": "Edit bag",
   "noBags": "No bags",
-
   "adminOverview": "Overview",
   "adminOrgs": "Organizations",
   "adminPlans": "Plans",
@@ -385,7 +371,7 @@
   "accountsBySupport": "Adding an account, changing a password or disabling an account is done by support. Tap an account to edit its permissions.",
   "appSection": "App",
   "aboutEdition": "About",
-  "editionVersion": "Bag trader edition · 1.1.1",
+  "editionVersion": "Bag trader edition · 1.2.0",
   "support": "Support",
   "edit": "Edit",
   "needMigration13": "Run 0013_bag_edition.sql in Supabase first",
@@ -493,5 +479,88 @@
   "expenseSaved": "Expense saved",
   "expenseCategory": "Category",
   "expenseNoteRequired": "Description (required)",
-  "expenseHint": "The amount is deducted from the bag cash and shown in today's expenses and reports."
+  "expenseHint": "The amount is deducted from the bag cash and shown in today's expenses and reports.",
+  "instantKarat": "Instant karat",
+  "makingPerPiece": "Making / piece",
+  "perGram": "Per gram",
+  "perPiece": "Per piece",
+  "makingDiscount": "Making discount",
+  "noDiscount": "No discount",
+  "dropFraction": "Drop fraction",
+  "extraDiscount": "Extra discount",
+  "finalMaking": "Final making",
+  "recoveredGoods": "Recovered goods",
+  "recoveredMaking": "Recovered making",
+  "addRecovered": "Add recovered",
+  "dailyCashTotal": "Daily cash total",
+  "dailyCashHint": "Opening cash + received",
+  "netCash": "Net cash",
+  "fixClass": "Fix type",
+  "fixClassGold": "Gold",
+  "fixClassScrap": "Scrap",
+  "fixCashNow": "Cash now (optional)",
+  "fixCashHint": "All, part or zero — the rest stays on account.",
+  "fixWithTrader": "Fix with a trader (optional)",
+  "noTrader": "No trader",
+  "traderGrams": "Trader grams",
+  "traderFixHint": "Empty = same grams and price as the shop.",
+  "opReceiveGold": "Receive gold",
+  "opReceiveGoldDesc": "Into the bag at any karat, factor 1.000 by default",
+  "opDeliverGold": "Deliver gold",
+  "opDeliverGoldDesc": "Out of the bag at any karat, factor 1.000 by default",
+  "opLira": "Sell lira with fees",
+  "opLiraDesc": "Gross weight, per-piece fees for us",
+  "opExchange": "Gold exchange",
+  "opExchangeDesc": "Receive and deliver with per-gram fees",
+  "liraFromBag": "Leaves the bag",
+  "liraFromBagHint": "Turn on if the lira is from bag stock.",
+  "liraFee": "Fee / piece",
+  "liraCountNeeded": "Enter the count to compute fees.",
+  "exchangeReceived": "Gold received",
+  "exchangeDelivered": "Gold delivered (optional)",
+  "exchangeDeliveredHint": "Whatever is not delivered stays on balance.",
+  "exchangeFee": "Exchange fee",
+  "exchangeFeePerGram": "Fee / gram",
+  "feeForUs": "For us",
+  "feeOnUs": "On us",
+  "openingBalances": "Opening balances",
+  "openingBalancesHint": "Prior balances for parties, and bag contents",
+  "openingBag": "Bag at start",
+  "openingBagHint": "Goods, scrap and cash on hand",
+  "openingGold": "Gold balance (net 24K)",
+  "openingCash": "Cash balance",
+  "openingForUs": "He owes us",
+  "openingForHim": "We owe him",
+  "openingSaved": "Balance saved — {doc}",
+  "bagMovements": "Movements",
+  "allMovements": "All",
+  "movementsIn": "Into the bag",
+  "movementsOut": "Out of the bag",
+  "noBagMovements": "No movements in this period",
+  "lastMakingHint": "Last making for this shop: {rate} {unit} — editable",
+  "recoveredLine": "Recovered {n}",
+  "@openingSaved": {
+    "placeholders": {
+      "doc": {
+        "type": "String"
+      }
+    }
+  },
+  "@lastMakingHint": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@recoveredLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

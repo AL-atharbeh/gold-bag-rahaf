@@ -1,4 +1,5 @@
 import '../../domain/enums.dart';
+import '../../domain/ledger.dart';
 import '../../domain/models.dart';
 
 /// ملخص يوم الموزّع من قيود اليوم.
@@ -14,7 +15,6 @@ class DaySummary {
     required this.scrapInMg,
     required this.cashInFils,
     required this.cashOutFils,
-    required this.makingProfitFils,
     this.expensesFils = 0,
     this.chequesInFils = 0,
     this.expenses = const [],
@@ -24,7 +24,6 @@ class DaySummary {
     List<DayPosting> postings, {
     required String? bagId,
     required String? cashboxId,
-    required String? makingIncomeId,
     String? expensesId,
     String? chequesId,
   }) {
@@ -32,7 +31,7 @@ class DaySummary {
     final expenseList = <(ExpenseCategory?, String?, int)>[];
     final txs = <String>{};
     var sold = 0, pieces = 0, returned = 0, goodsIn = 0, scrap = 0;
-    var cashIn = 0, cashOut = 0, making = 0;
+    var cashIn = 0, cashOut = 0;
 
     for (final p in postings) {
       if (p.txReversed || p.txType == TxType.reversal) continue;
@@ -44,7 +43,9 @@ class DaySummary {
         } else if (p.txType == TxType.sale && p.amount < 0) {
           sold -= p.amount;
           pieces -= p.quantity ?? 0;
-        } else if (p.txType == TxType.goodsReturn && p.amount > 0) {
+        } else if ((p.txType == TxType.goodsReturn ||
+                p.lineNote == noteRecovered) &&
+            p.amount > 0) {
           returned += p.amount;
         } else if (p.txType == TxType.goodsIn && p.amount > 0) {
           goodsIn += p.amount;
@@ -54,10 +55,12 @@ class DaySummary {
           cashIn += p.amount;
         } else {
           cashOut -= p.amount;
+          // سحب الموظف يخرج من الكاش ويُعرض مع المصاريف
+          if (p.lineNote == noteEmployeeDraw) {
+            expenses -= p.amount;
+            expenseList.add((null, p.txNote ?? noteEmployeeDraw, -p.amount));
+          }
         }
-      } else if (p.accountId == makingIncomeId && p.ledger == LedgerKind.cash) {
-        // الإيراد دائن: سالب في القيد = ربح
-        making -= p.amount;
       } else if (p.accountId == expensesId && p.ledger == LedgerKind.cash) {
         expenses += p.amount;
         expenseList
@@ -78,7 +81,6 @@ class DaySummary {
       scrapInMg: scrap,
       cashInFils: cashIn,
       cashOutFils: cashOut,
-      makingProfitFils: making,
       expensesFils: expenses,
       chequesInFils: chequesIn,
       expenses: expenseList,
@@ -93,7 +95,6 @@ class DaySummary {
   final int scrapInMg;
   final int cashInFils;
   final int cashOutFils;
-  final int makingProfitFils;
 
   /// مصاريف اليوم من كاش الشنطة.
   final int expensesFils;
@@ -103,7 +104,4 @@ class DaySummary {
 
   /// كل مصروف: البند، والوصف، والمبلغ.
   final List<(ExpenseCategory?, String?, int)> expenses;
-
-  /// الربح بعد المصاريف.
-  int get netProfitFils => makingProfitFils - expensesFils;
 }

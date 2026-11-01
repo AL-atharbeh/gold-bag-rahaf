@@ -12,8 +12,8 @@ import '../cheques/cheques_page.dart';
 import '../common/inputs.dart';
 import '../common/ui.dart';
 import '../employees/employees_page.dart';
+import '../opening/opening_balances_page.dart';
 import '../reports/reports_page.dart';
-import '../retail/customers_page.dart';
 import '../team/member_editor.dart';
 import '../team/team_page.dart';
 
@@ -82,9 +82,10 @@ class BagSettingsPage extends ConsumerWidget {
                     onTap: () => push(const ReportsPage()),
                   ),
                   _Tile(
-                    icon: Icons.groups_outlined,
-                    title: l.tabReceivables,
-                    onTap: () => push(const CustomersPage()),
+                    icon: Icons.playlist_add_check_rounded,
+                    title: l.openingBalances,
+                    subtitle: l.openingBalancesHint,
+                    onTap: () => push(const OpeningBalancesPage()),
                   ),
                   if (m.can(Perm.chequesManage))
                     _Tile(

@@ -1,4 +1,5 @@
 import '../../domain/enums.dart';
+import '../../domain/ledger.dart';
 import '../../domain/models.dart';
 
 /// مفتاح صنف + عيار، مع الاسمين للعرض.
@@ -50,7 +51,6 @@ class DaySales {
   final sold = Qty();
   final returned = Qty();
   int makingFils = 0;
-  int profitFils = 0;
   int invoices = 0;
   int get netMg => sold.netMg - returned.netMg;
 }
@@ -67,7 +67,6 @@ class SalesReport {
     required DateTime to,
     required List<PeriodPosting> postings,
     required String? bagId,
-    required String? makingIncomeId,
   }) {
     final r = SalesReport._(_day(from), _day(to));
     final invoicesPerDay = <DateTime, Set<String>>{};
@@ -97,7 +96,9 @@ class SalesReport {
           r.byItem.putIfAbsent(key.id, Qty.new).add(pcs, gross, net);
           invoicesPerDay.putIfAbsent(_day(p.occurredAt), () => {}).add(p.txId);
           invoicesPerParty.putIfAbsent(partyKey, () => {}).add(p.txId);
-        } else if (p.txType == TxType.goodsReturn && p.amount > 0) {
+        } else if ((p.txType == TxType.goodsReturn ||
+                p.lineNote == noteRecovered) &&
+            p.amount > 0) {
           // مرتجع من محل إلى الشنطة (المرتجع للمشغل يخرج منها فلا يُحسب)
           r.returned.add(pcs, gross, net);
           day.returned.add(pcs, gross, net);
@@ -117,11 +118,15 @@ class SalesReport {
         party.makingFils += p.amount;
       }
 
-      // ربح المصنوعية بعد التكلفة — دائن في حساب الإيراد
-      if (p.accountId == makingIncomeId && p.ledger == LedgerKind.cash) {
-        r.profitFils -= p.amount;
-        day.profitFils -= p.amount;
+      // خصم المصنوعية يُنقص ما فُوتر
+      if (p.accountId == p.partyId &&
+          p.ledger == LedgerKind.cash &&
+          p.lineNote == noteMakingDiscount) {
+        r.makingFils += p.amount;
+        day.makingFils += p.amount;
+        party.makingFils += p.amount;
       }
+
     }
 
     for (final e in invoicesPerDay.entries) {
@@ -145,7 +150,6 @@ class SalesReport {
   final sold = Qty();
   final returned = Qty();
   int makingFils = 0;
-  int profitFils = 0;
   int invoices = 0;
 
   final days = <DateTime, DaySales>{};

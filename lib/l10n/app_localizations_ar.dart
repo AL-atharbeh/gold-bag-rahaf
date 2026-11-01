@@ -678,7 +678,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get karatAndFactor => 'العيار والمعامل';
 
   @override
-  String get otherFactor => 'معامل آخر…';
+  String get otherFactor => 'عيار لحظي (لهذه العملية فقط)…';
 
   @override
   String get tabDistributors => 'الموزّعون';
@@ -1205,7 +1205,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get aboutEdition => 'عن النسخة';
 
   @override
-  String get editionVersion => 'نسخة تاجر الشنطة · 1.1.1';
+  String get editionVersion => 'نسخة تاجر الشنطة · 1.2.0';
 
   @override
   String get support => 'الدعم';
@@ -1549,4 +1549,190 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get expenseHint =>
       'يُخصم المبلغ من كاش الشنطة ويظهر في مصاريف اليوم وتقاريره.';
+
+  @override
+  String get instantKarat => 'عيار لحظي';
+
+  @override
+  String get makingPerPiece => 'المصنوعية / قطعة';
+
+  @override
+  String get perGram => 'على الغرام';
+
+  @override
+  String get perPiece => 'على القطعة';
+
+  @override
+  String get makingDiscount => 'خصم المصنوعية';
+
+  @override
+  String get noDiscount => 'بلا خصم';
+
+  @override
+  String get dropFraction => 'حذف الكسر';
+
+  @override
+  String get extraDiscount => 'خصم إضافي';
+
+  @override
+  String get finalMaking => 'المصنوعية النهائية';
+
+  @override
+  String get recoveredGoods => 'المسترد من المحل';
+
+  @override
+  String get recoveredMaking => 'مصنوعية المسترد';
+
+  @override
+  String get addRecovered => 'إضافة مسترد';
+
+  @override
+  String get dailyCashTotal => 'مجموع الكاش اليومي';
+
+  @override
+  String get dailyCashHint => 'كاش بداية اليوم + المقبوض';
+
+  @override
+  String get netCash => 'الكاش الصافي';
+
+  @override
+  String get fixClass => 'تصنيف التسكير';
+
+  @override
+  String get fixClassGold => 'حلة';
+
+  @override
+  String get fixClassScrap => 'كسر';
+
+  @override
+  String get fixCashNow => 'نقد الآن (اختياري)';
+
+  @override
+  String get fixCashHint => 'كله أو جزء منه أو صفر — والباقي يبقى ذمة.';
+
+  @override
+  String get fixWithTrader => 'تسكير مع تاجر (اختياري)';
+
+  @override
+  String get noTrader => 'بدون تاجر';
+
+  @override
+  String get traderGrams => 'غرامات التاجر';
+
+  @override
+  String get traderFixHint => 'فارغة = نفس غرامات المحل وسعره.';
+
+  @override
+  String get opReceiveGold => 'استلام ذهب';
+
+  @override
+  String get opReceiveGoldDesc =>
+      'يدخل الشنطة بأي عيار، ومعامله 1.000 ويمكن تعديله';
+
+  @override
+  String get opDeliverGold => 'تسليم ذهب';
+
+  @override
+  String get opDeliverGoldDesc =>
+      'يخرج من الشنطة بأي عيار، ومعامله 1.000 ويمكن تعديله';
+
+  @override
+  String get opLira => 'بيع ليرة مع الأجور';
+
+  @override
+  String get opLiraDesc => 'وزن قائم، والأجور على القطعة لنا';
+
+  @override
+  String get opExchange => 'بدل ذهب';
+
+  @override
+  String get opExchangeDesc => 'استلام وتسليم بأجور على الغرام، لنا أو علينا';
+
+  @override
+  String get liraFromBag => 'تخرج من الشنطة';
+
+  @override
+  String get liraFromBagHint => 'فعّله إذا كانت الليرة من مخزون الشنطة.';
+
+  @override
+  String get liraFee => 'الأجور / قطعة';
+
+  @override
+  String get liraCountNeeded => 'أدخل العدد لحساب الأجور.';
+
+  @override
+  String get exchangeReceived => 'الذهب المستلم';
+
+  @override
+  String get exchangeDelivered => 'الذهب المسلَّم (اختياري)';
+
+  @override
+  String get exchangeDeliveredHint => 'ما لا يُسلَّم الآن يبقى في الرصيد.';
+
+  @override
+  String get exchangeFee => 'أجور البدل';
+
+  @override
+  String get exchangeFeePerGram => 'الأجور / غرام';
+
+  @override
+  String get feeForUs => 'لنا';
+
+  @override
+  String get feeOnUs => 'علينا';
+
+  @override
+  String get openingBalances => 'الأرصدة الافتتاحية';
+
+  @override
+  String get openingBalancesHint =>
+      'حسابات سابقة للمحلات والتجار والمشاغل، ومحتوى الشنطة';
+
+  @override
+  String get openingBag => 'محتوى الشنطة عند البدء';
+
+  @override
+  String get openingBagHint => 'البضاعة والكسر والكاش الموجود الآن';
+
+  @override
+  String get openingGold => 'رصيد الذهب (صافي 24)';
+
+  @override
+  String get openingCash => 'رصيد النقد';
+
+  @override
+  String get openingForUs => 'لنا عليه';
+
+  @override
+  String get openingForHim => 'له علينا';
+
+  @override
+  String openingSaved(String doc) {
+    return 'تم تسجيل الرصيد — $doc';
+  }
+
+  @override
+  String get bagMovements => 'الحركات';
+
+  @override
+  String get allMovements => 'الكل';
+
+  @override
+  String get movementsIn => 'وارد للشنطة';
+
+  @override
+  String get movementsOut => 'صادر من الشنطة';
+
+  @override
+  String get noBagMovements => 'لا توجد حركات في هذه الفترة';
+
+  @override
+  String lastMakingHint(String rate, String unit) {
+    return 'آخر مصنوعية لهذا المحل: $rate $unit — يمكن تعديلها';
+  }
+
+  @override
+  String recoveredLine(int n) {
+    return 'مسترد $n';
+  }
 }

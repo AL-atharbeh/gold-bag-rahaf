@@ -504,6 +504,7 @@ class PeriodPosting {
     this.karatId,
     this.karatName,
     this.makingPerGramFils,
+    this.lineNote,
   });
 
   factory PeriodPosting.fromJson(Map<String, dynamic> j) {
@@ -530,9 +531,11 @@ class PeriodPosting {
       karatId: j['karat_id'] as String?,
       karatName: (j['karats'] as Map?)?['name'] as String?,
       makingPerGramFils: (j['making_per_gram_fils'] as num?)?.toInt(),
+      lineNote: j['note'] as String?,
     );
   }
 
+  final String? lineNote;
   final String txId;
   final TxType txType;
   final String docNumber;

@@ -6,8 +6,6 @@ import 'package:gold_bashar/app/providers.dart';
 import 'package:gold_bashar/domain/enums.dart';
 import 'package:gold_bashar/domain/models.dart';
 import 'package:gold_bashar/features/accounts/accounts_page.dart';
-import 'package:gold_bashar/features/statement/statement_page.dart';
-import 'package:gold_bashar/features/retail/customers_page.dart';
 import 'package:gold_bashar/features/shell/app_shell.dart';
 import 'package:gold_bashar/l10n/app_localizations.dart';
 import 'package:gold_bashar/platform/platform_models.dart';
@@ -138,20 +136,6 @@ void main() {
     expect(find.textContaining('لنا عليه: 87.500'), findsOneWidget);
     // سالب = نحن مدينون له
     expect(find.textContaining('له علينا: 20.000'), findsOneWidget);
-  });
-
-  testWidgets('كشف الحساب يعرض الرصيد ورسالة الفراغ', (t) async {
-    await pump(
-      t,
-      const StatementPage(accountId: 'a-showroom', title: 'محل الأمانة'),
-    );
-    expect(find.textContaining('لنا عليه: 87.500'), findsOneWidget);
-    expect(find.textContaining('لا توجد حركات'), findsOneWidget);
-  });
-
-  testWidgets('شاشة الزبائن تجمع الذمم', (t) async {
-    await pump(t, const CustomersPage());
-    expect(find.text('إجمالي الذمم'), findsOneWidget);
   });
 
   testWidgets('أزرار الإضافة العائمة لا تتشارك وسم Hero', (t) async {

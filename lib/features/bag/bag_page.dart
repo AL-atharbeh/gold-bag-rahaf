@@ -19,6 +19,7 @@ import '../bagday/day_pages.dart';
 import '../bagday/expense_page.dart';
 import '../reports/reports_page.dart';
 import 'bag_inventory.dart';
+import 'bag_movements.dart';
 import 'goods_in_page.dart';
 
 /// الشنطة بتبويبين: المخزون (ما فيها الآن ووارد البضاعة)، والمشاغل
@@ -33,7 +34,7 @@ class BagPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -56,6 +57,9 @@ class BagPage extends ConsumerWidget {
                   icon: const Icon(Icons.inventory_2_outlined, size: 20),
                   text: l.bagStock),
               Tab(
+                  icon: const Icon(Icons.swap_vert_rounded, size: 20),
+                  text: l.bagMovements),
+              Tab(
                   icon: const Icon(Icons.precision_manufacturing_outlined,
                       size: 20),
                   text: l.bagWorkshops),
@@ -65,6 +69,7 @@ class BagPage extends ConsumerWidget {
         body: TabBarView(
           children: [
             const _StockView(),
+            const BagMovementsView(),
             AccountsPage(
               kind: AccountKind.factory,
               title: l.bagWorkshops,

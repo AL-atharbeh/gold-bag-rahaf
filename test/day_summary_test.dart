@@ -38,7 +38,6 @@ void main() {
       ],
       bagId: 'bag',
       cashboxId: 'cashbox',
-      makingIncomeId: 'income',
     );
     expect(d.txCount, 2);
     expect(d.soldNetMg, 8850);
@@ -46,7 +45,6 @@ void main() {
     expect(d.scrapInMg, 2000);
     expect(d.cashInFils, 50000);
     expect(d.cashOutFils, 20000);
-    expect(d.makingProfitFils, 11000);
   });
 
   test('المصاريف تُخصم من الكاش ومن الربح، والشيك لا يُعدّ كاشاً', () {
@@ -63,13 +61,11 @@ void main() {
       ],
       bagId: 'bag',
       cashboxId: 'cashbox',
-      makingIncomeId: 'income',
       expensesId: 'expenses',
       chequesId: 'cheques',
     );
     expect(d.expensesFils, 5000);
     expect(d.expenses.single.$1, ExpenseCategory.fuel);
-    expect(d.netProfitFils, 10000);
     expect(d.cashInFils, 0);
     expect(d.cashOutFils, 5000);
     expect(d.chequesInFils, 100000);

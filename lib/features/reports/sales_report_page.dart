@@ -52,7 +52,6 @@ class _SalesReportPageState extends ConsumerState<SalesReportPage> {
           to: _period.to,
           postings: rows,
           bagId: sys[SystemAccount.shanta],
-          makingIncomeId: sys[SystemAccount.makingIncome],
         );
         _loading = false;
       });
@@ -137,11 +136,6 @@ class _SalesReportPageState extends ConsumerState<SalesReportPage> {
                         '${formatDinars(r.makingFils)} $jd',
                         null
                       ),
-                      (
-                        l.makingProfit,
-                        '${formatDinars(r.profitFils)} $jd',
-                        null
-                      ),
                       (l.invoicesCount, '${r.invoices}', null),
                     ]),
                     const SizedBox(height: 16),
@@ -169,7 +163,7 @@ class _SalesReportPageState extends ConsumerState<SalesReportPage> {
                               title: ltrIsolate(formatDate(e.key)),
                               sub: '${l.invoicesCount}: ${e.value.invoices}',
                               value: '${formatGrams(e.value.netMg)} $g',
-                              value2: '${formatDinars(e.value.profitFils)} $jd',
+                              value2: '${formatDinars(e.value.makingFils)} $jd',
                             ),
                         ]),
                       ),

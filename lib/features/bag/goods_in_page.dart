@@ -247,6 +247,7 @@ class _GoodsInPageState extends ConsumerState<GoodsInPage> {
                       line: _lines[i],
                       items: items,
                       karats: karats,
+                      editableFactor: true,
                       canRemove: _lines.length > 1,
                       onRemove: () => _removeLine(i),
                       onNewItem: () => _newItem(_lines[i]),

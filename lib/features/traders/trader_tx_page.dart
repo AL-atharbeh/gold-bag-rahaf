@@ -16,6 +16,7 @@ import '../bag/goods_lines.dart';
 import '../common/inputs.dart';
 import '../common/ui.dart';
 import '../parties/balance_widgets.dart';
+import 'trader_extra_pages.dart';
 
 /// عمليات التعامل مع التاجر — مأخوذة من ورقة "الشركة الدولية".
 enum TraderOp {
@@ -34,6 +35,12 @@ enum TraderOp {
   /// استلام كسر من التاجر إلى الشنطة.
   receiveScrap,
 
+  /// تسليم ذهب من الشنطة بأي عيار، بمعامل 1.000 افتراضياً.
+  deliverGold,
+
+  /// استلام ذهب إلى الشنطة بأي عيار، بمعامل 1.000 افتراضياً.
+  receiveGold,
+
   /// قبض نقد أو شيك.
   receiveCash,
 
@@ -45,6 +52,18 @@ enum TraderOp {
 Future<void> showTraderOps(BuildContext context, Account trader) {
   final l = context.l10n;
   final ops = <(TraderOp?, IconData, String, String)>[
+    (
+      TraderOp.receiveGold,
+      Icons.login_rounded,
+      l.opReceiveGold,
+      l.opReceiveGoldDesc
+    ),
+    (
+      TraderOp.deliverGold,
+      Icons.logout_rounded,
+      l.opDeliverGold,
+      l.opDeliverGoldDesc
+    ),
     (
       TraderOp.sellGold,
       Icons.call_made_rounded,
@@ -90,6 +109,18 @@ Future<void> showTraderOps(BuildContext context, Account trader) {
             ? GoodsInPage(workshopId: trader.id)
             : TraderTxPage(trader: trader, op: op),
       ),
+    (
+      Icons.monetization_on_outlined,
+      l.opLira,
+      l.opLiraDesc,
+      () => LiraSalePage(trader: trader),
+    ),
+    (
+      Icons.swap_horiz_rounded,
+      l.opExchange,
+      l.opExchangeDesc,
+      () => ExchangePage(trader: trader),
+    ),
   ]);
 }
 
@@ -210,12 +241,25 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
       op == TraderOp.sellGold ||
       op == TraderOp.buyGold ||
       op == TraderOp.fixPrice;
+  bool get _isGold =>
+      op == TraderOp.deliverGold || op == TraderOp.receiveGold;
   bool get _isScrap =>
-      op == TraderOp.deliverScrap || op == TraderOp.receiveScrap;
+      op == TraderOp.deliverScrap || op == TraderOp.receiveScrap || _isGold;
+
+  /// تخرج من الشنطة، فلا تتجاوز ما فيها.
+  bool get _delivers =>
+      op == TraderOp.deliverScrap || op == TraderOp.deliverGold;
 
   /// البيع والشراء يُدخلان بالعيار والوزن كالكسر، ويُحوَّلان للحلة تلقائياً.
   bool get _usesLines =>
       _isScrap || op == TraderOp.sellGold || op == TraderOp.buyGold;
+
+  // التسكير: دفعة اختيارية، وتاجر اختياري، وتصنيف حلة أو كسر
+  final _fixCash = TextEditingController();
+  final _traderGrams = TextEditingController();
+  final _traderPrice = TextEditingController();
+  String? _fixTraderId;
+  String _fixClass = noteFixGold;
 
   /// استلام كسر: جزء منه يُشترى نقداً بدل إضافته كله لرصيد الذهب.
   bool _partial = false;
@@ -305,6 +349,9 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
   void dispose() {
     _partGrams.dispose();
     _partPrice.dispose();
+    _fixCash.dispose();
+    _traderGrams.dispose();
+    _traderPrice.dispose();
     for (final c in [_grams, _price, _amount, _note, _chequeNo, _bank]) {
       c.dispose();
     }
@@ -320,6 +367,8 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
         TraderOp.fixPrice => l.opFix,
         TraderOp.deliverScrap => l.opDeliverScrap,
         TraderOp.receiveScrap => l.opReceiveScrap,
+        TraderOp.deliverGold => l.opDeliverGold,
+        TraderOp.receiveGold => l.opReceiveGold,
         TraderOp.receiveCash => l.opReceiveCash,
         TraderOp.payCash => l.opPayCash,
       };
@@ -413,7 +462,7 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
     }
 
     if (_isScrap) {
-      if (op == TraderOp.deliverScrap) {
+      if (_delivers) {
         // لا تسليم لكسر ليس في الشنطة — المخزون من السيرفر لحظة الحفظ
         ref.invalidate(itemStockProvider(bag));
         final stock = await ref.read(itemStockProvider(bag).future);
@@ -430,7 +479,26 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
     setState(() => _busy = true);
     try {
       final String doc;
-      if (_isPrice) {
+      if (op == TraderOp.fixPrice) {
+        final grams = _priceNet(karats);
+        final price = parseDinars(_price.text)!;
+        doc = await repo.fix(
+          partyId: widget.trader.id,
+          tradingIncomeId: trading,
+          cashboxId: cashbox,
+          netWeightMg: grams,
+          pricePerGramFils: price,
+          owedToUs: _owedToUs(goldBalance),
+          cashFils: parseDinars(_fixCash.text) ?? 0,
+          traderId: _fixTraderId,
+          // فارغة = نفس غرامات المحل وسعره
+          traderNetMg: parseGrams(_traderGrams.text) ?? grams,
+          traderPriceFils: parseDinars(_traderPrice.text) ?? price,
+          classNote: _fixClass,
+          occurredAt: _date,
+          note: note,
+        );
+      } else if (_isPrice) {
         final described = lines == null ? null : _describe(lines, karats);
         doc = await repo.traderPrice(
           traderId: widget.trader.id,
@@ -456,7 +524,7 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
           partyId: widget.trader.id,
           bagAccountId: bag,
           lines: lines!,
-          toParty: op == TraderOp.deliverScrap,
+          toParty: _delivers,
           pricing: pricing,
           occurredAt: _date,
           note: note,
@@ -517,6 +585,7 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
       body: AsyncBody<List<KaratOption>>(
         value: karats,
         data: (ks) {
+          if (_isGold) ensurePure(_scrap, ks);
           ensureKarats(_scrap, ks);
 
           // الأثر على الرصيدين قبل الحفظ
@@ -529,9 +598,12 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
             final s = _owedToUs(goldBefore) ? 1 : -1;
             dGold = -s * g;
             dCash = s * v;
+            if (op == TraderOp.fixPrice) {
+              dCash -= s * (parseDinars(_fixCash.text) ?? 0);
+            }
           } else if (_isScrap) {
             final net = _linesNet(ks);
-            dGold = op == TraderOp.deliverScrap ? net : -net;
+            dGold = _delivers ? net : -net;
             // الجزء المشترى نقداً يرجع لرصيد ذهبه ويصير ثمنه علينا
             if (op == TraderOp.receiveScrap && _partial) {
               final part = parseGrams(_partGrams.text) ?? 0;
@@ -548,7 +620,7 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
           final stock = bagId == null
               ? null
               : ref.watch(itemStockProvider(bagId)).valueOrNull;
-          final problems = op == TraderOp.deliverScrap && stock != null
+          final problems = _delivers && stock != null
               ? _scrapProblems(
                   l, _scrapLines(ks) ?? const [], _bagScrap(stock), ks)
               : const <String>[];
@@ -640,7 +712,9 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
           GoodsLineCard(
             key: ObjectKey(_scrap[i]),
             index: i,
-            title: _isScrap ? l.scrapLine(i + 1) : l.lineNumber(i + 1),
+            title: _isScrap && !_isGold
+                ? l.scrapLine(i + 1)
+                : l.lineNumber(i + 1),
             line: _scrap[i],
             karats: ks,
             editableFactor: true,
@@ -666,7 +740,7 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
                 : () => setState(() => _scrap.add(
                     GoodsLineState(karatId: _scrap.last.karatId, scrap: true))),
             icon: const Icon(Icons.add_circle_outline_rounded),
-            label: Text(_isScrap ? l.addScrap : l.addLine),
+            label: Text(_isScrap && !_isGold ? l.addScrap : l.addLine),
             style: TextButton.styleFrom(foregroundColor: AppColors.goldDark),
           ),
         ),
@@ -754,6 +828,62 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
                   ),
                 ),
             ]),
+        const SizedBox(height: 16),
+        Text(l.fixClass, style: const TextStyle(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 8),
+        SegmentedButton<String>(
+          segments: [
+            ButtonSegment(value: noteFixGold, label: Text(l.fixClassGold)),
+            ButtonSegment(value: noteFixScrap, label: Text(l.fixClassScrap)),
+          ],
+          selected: {_fixClass},
+          showSelectedIcon: false,
+          onSelectionChanged: (s) => setState(() => _fixClass = s.first),
+        ),
+        const SizedBox(height: 16),
+        AdaptiveBox(
+          width: 260,
+          child: DinarsField(
+            controller: _fixCash,
+            label: l.fixCashNow,
+            required: false,
+            allowZero: true,
+            onChanged: (_) => setState(() {}),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(l.fixCashHint,
+            style:
+                const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        if (widget.trader.kind == AccountKind.showroom) ...[
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String?>(
+            initialValue: _fixTraderId,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: l.fixWithTrader,
+              prefixIcon: const Icon(Icons.handshake_outlined, size: 20),
+            ),
+            items: [
+              DropdownMenuItem(value: null, child: Text(l.noTrader)),
+              for (final t in ref.watch(suppliersProvider).valueOrNull ??
+                  const <Account>[])
+                DropdownMenuItem(value: t.id, child: Text(t.name)),
+            ],
+            onChanged: (v) => setState(() => _fixTraderId = v),
+          ),
+          if (_fixTraderId != null) ...[
+            const SizedBox(height: 12),
+            Wrap(spacing: 12, runSpacing: 12, children: [
+              _gramsField(l, _traderGrams, l.traderGrams, required: false),
+              _priceField(l, _traderPrice, required: false),
+            ]),
+            const SizedBox(height: 4),
+            Text(l.traderFixHint,
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.textSecondary)),
+          ],
+        ],
       ] else ...[
         Text(l.goldLines, style: const TextStyle(fontWeight: FontWeight.w800)),
         const SizedBox(height: 10),
@@ -777,7 +907,7 @@ class _TraderTxPageState extends ConsumerState<TraderTxPage> {
     final part = parseGrams(_partGrams.text) ?? 0;
     final partPrice = parseDinars(_partPrice.text) ?? 0;
     return [
-      if (op == TraderOp.deliverScrap && have.isNotEmpty) ...[
+      if (_delivers && have.isNotEmpty) ...[
         Wrap(spacing: 8, runSpacing: 6, children: [
           for (final e in have.entries)
             if (e.value > 0)

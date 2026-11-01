@@ -5,6 +5,7 @@ import '../../app/providers.dart';
 import '../../app/theme.dart';
 import '../../core/locale.dart';
 import '../../core/units.dart';
+import '../../data/gold_repository.dart';
 import '../../domain/enums.dart';
 import '../../domain/ledger.dart';
 import '../../domain/models.dart';
@@ -14,11 +15,26 @@ import '../common/inputs.dart';
 import '../common/ui.dart';
 import '../parties/balance_widgets.dart';
 
+/// خصم المصنوعية: بلا خصم، أو حذف الكسر، أو حذف الكسر مع خصم إضافي.
+enum _Discount { none, fraction, extra }
+
+/// تكلفة المصنوعية التي تتبع وزناً يخرج من الشنطة أو يعود إليها — بمتوسط
+/// رأس المال لكل غرام صافٍ فيها.
+int capitalCost(int net, AccountBalance? bag) {
+  if (bag == null || net <= 0 || bag.goldMg <= 0 || bag.cashFils <= 0) {
+    return 0;
+  }
+  final cost = (bag.cashFils * net + bag.goldMg ~/ 2) ~/ bag.goldMg;
+  return cost > bag.cashFils ? bag.cashFils : cost;
+}
+
 /// بيع للمحل من الشنطة، مع استلام كسر و/أو نقد في نفس الحركة.
 ///
-/// ثلاثة أقسام كلها اختيارية — يكفي واحد منها:
+/// أربعة أقسام كلها اختيارية — يكفي واحد منها:
 ///   • البضاعة المباعة: بمعامل البضاعة للمحل (0.885 لعيار 21) ومصنوعية
 ///     على القائم تصير ديناً نقدياً عليه.
+///   • المسترد: بضاعة تعود من المحل بمعامل البضاعة، ويُخصم عنه ذهبها
+///     ومصنوعيتها إن أُدخلت.
 ///   • الكسر المستلم: بمعامل الكسر (0.870 لعيار 21) وينقص ذهب المحل.
 ///   • النقد المستلم: يدخل الصندوق وينقص دين المحل النقدي.
 class ShopSalePage extends ConsumerStatefulWidget {
@@ -36,7 +52,10 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
   final _note = TextEditingController();
   final _cash = TextEditingController();
   final List<GoodsLineState> _goods = [GoodsLineState()];
+  final List<GoodsLineState> _recovered = [];
   final List<GoodsLineState> _scrap = [];
+  final _discount = TextEditingController();
+  _Discount _discountMode = _Discount.none;
   late String? _shopId = widget.shopId;
   DateTime _date = DateTime.now();
   bool _busy = false;
@@ -45,7 +64,8 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
   void dispose() {
     _note.dispose();
     _cash.dispose();
-    for (final l in [..._goods, ..._scrap]) {
+    _discount.dispose();
+    for (final l in [..._goods, ..._recovered, ..._scrap]) {
       l.dispose();
     }
     super.dispose();
@@ -71,6 +91,31 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
         ..itemId = p.itemId
         ..karatId = p.karatId;
     });
+  }
+
+  /// ما يُخصم من مجموع المصنوعية النهائي.
+  int _discountFils(int total) => switch (_discountMode) {
+        _Discount.none => 0,
+        _Discount.fraction => makingDiscountFor(total),
+        _Discount.extra => makingDiscountFor(total,
+            extraFils: parseDinars(_discount.text) ?? 0),
+      };
+
+  /// يعبّئ آخر مصنوعية بيع بها هذا الصنف لهذا المحل، ويبقى قابلاً للتعديل.
+  void _applyRemembered(AppLocalizations l, Map<String, LastMaking> known) {
+    for (final line in _goods) {
+      if (line.itemId == null) continue;
+      final key = '${line.itemId}|${line.karatId}';
+      if (line.makingKey == key) continue;
+      line.makingKey = key;
+      final m = known[key];
+      line.makingHint = null;
+      if (m == null) continue;
+      line.making.text = formatDinars(m.rateFils);
+      line.perPiece = m.perPiece;
+      line.makingHint = l.lastMakingHint(
+          formatDinars(m.rateFils), m.perPiece ? l.perPiece : l.perGram);
+    }
   }
 
   void _addScrap() {
@@ -103,15 +148,6 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
       out.add(g);
     }
     return out;
-  }
-
-  /// تكلفة المصنوعية التي تخرج مع البضاعة من رأس مال الشنطة — بمتوسط
-  /// رأس المال لكل غرام صافٍ فيها.
-  int _costOut(int goodsNet, AccountBalance? bag) {
-    if (bag == null || goodsNet <= 0 || bag.goldMg <= 0 || bag.cashFils <= 0)
-      return 0;
-    final cost = (bag.cashFils * goodsNet + bag.goldMg ~/ 2) ~/ bag.goldMg;
-    return cost > bag.cashFils ? bag.cashFils : cost;
   }
 
   /// كل صنف وعيار يتجاوز البيعُ فيه الموجودَ في الشنطة وزناً أو عدداً.
@@ -159,7 +195,8 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
     if (!_form.currentState!.validate()) return;
     final goods = _collect(_goods, goodsKarats);
     final scrap = _collect(_scrap, scrapKarats);
-    if (goods == null || scrap == null) {
+    final recovered = _collect(_recovered, goodsKarats);
+    if (goods == null || scrap == null || recovered == null) {
       showResult(context, l.fillLines, error: true);
       return;
     }
@@ -169,7 +206,7 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
       showResult(context, l.invalidAmount, error: true);
       return;
     }
-    if (goods.isEmpty && scrap.isEmpty && cash == 0) {
+    if (goods.isEmpty && scrap.isEmpty && recovered.isEmpty && cash == 0) {
       showResult(context, l.emptyTx, error: true);
       return;
     }
@@ -207,6 +244,9 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
     }
 
     final goodsNet = goods.fold<int>(0, (a, g) => a + g.netMg);
+    final recoveredNet = recovered.fold<int>(0, (a, g) => a + g.netMg);
+    final makingTotal = goods.fold<int>(0, (a, g) => a + g.makingFils) -
+        recovered.fold<int>(0, (a, g) => a + g.makingFils);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     setState(() => _busy = true);
@@ -218,8 +258,11 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
             makingIncomeId: makingIncome,
             goods: goods,
             scrap: scrap,
+            recovered: recovered,
             cashReceivedFils: cash,
-            costOutFils: _costOut(goodsNet, bagBalance),
+            costOutFils: capitalCost(goodsNet, bagBalance),
+            costBackFils: capitalCost(recoveredNet, bagBalance),
+            makingDiscountFils: _discountFils(makingTotal),
             occurredAt: _date,
             note: _note.text.trim().isEmpty ? null : _note.text.trim(),
           );
@@ -273,6 +316,7 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
     List<KaratOption> scrapKarats,
   ) {
     ensureKarats(_scrap, scrapKarats);
+    ensureKarats(_recovered, goodsKarats);
 
     final sys = ref.watch(systemAccountsProvider).valueOrNull ?? {};
     final bagId = sys[SystemAccount.shanta];
@@ -316,19 +360,29 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
       }
       ensureKarats([line], karatsFor(line));
     }
+    final known = _shopId == null
+        ? null
+        : ref.watch(lastMakingsProvider(_shopId!)).valueOrNull;
+    if (known != null) _applyRemembered(l, known);
     final goods = _collect(_goods, goodsKarats) ?? const <GoodsLine>[];
+    final recovered = _collect(_recovered, goodsKarats) ?? const <GoodsLine>[];
     final scrap = _collect(_scrap, scrapKarats) ?? const <GoodsLine>[];
     final cash = parseDinars(_cash.text) ?? 0;
 
     final goodsNet = goods.fold<int>(0, (a, g) => a + g.netMg);
-    final making = goods.fold<int>(0, (a, g) => a + g.makingFils);
+    final soldMaking = goods.fold<int>(0, (a, g) => a + g.makingFils);
+    final recoveredNet = recovered.fold<int>(0, (a, g) => a + g.netMg);
+    final recoveredMaking = recovered.fold<int>(0, (a, g) => a + g.makingFils);
+    final making = soldMaking - recoveredMaking;
+    final discount = _discountFils(making);
     final scrapNet = scrap.fold<int>(0, (a, g) => a + g.netMg);
 
     final goldBefore = shopBalance?.goldMg ?? 0;
     final cashBefore = shopBalance?.cashFils ?? 0;
-    final goldAfter = goldBefore + goodsNet - scrapNet;
-    final cashAfter = cashBefore + making - cash;
-    final touched = goodsNet != 0 || scrapNet != 0 || cash != 0;
+    final goldAfter = goldBefore + goodsNet - recoveredNet - scrapNet;
+    final cashAfter = cashBefore + making - discount - cash;
+    final touched =
+        goodsNet != 0 || recoveredNet != 0 || scrapNet != 0 || cash != 0;
 
     // ما يتجاوز الموجود في الشنطة — يظهر هنا ويمنع الحفظ
     final warnings = stock == null
@@ -384,7 +438,12 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
                           ],
                           onChanged: widget.shopId != null
                               ? null
-                              : (v) => setState(() => _shopId = v),
+                              : (v) => setState(() {
+                                    _shopId = v;
+                                    for (final g in _goods) {
+                                      g.makingKey = null;
+                                    }
+                                  }),
                           validator: (v) => v == null ? l.requiredField : null,
                         ),
                       ),
@@ -456,6 +515,7 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
                         items: saleItems,
                         karats: goodsKarats,
                         products: products,
+                        perPieceOption: true,
                         canRemove: true,
                         onRemove: () =>
                             setState(() => _goods.removeAt(i).dispose()),
@@ -484,7 +544,81 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
                               fontSize: 13)),
                     ),
 
-                  // ٢) الكسر المستلم
+                  // خصم المصنوعية على المجموع النهائي
+                  if (making > 0) ...[
+                    section(l.makingDiscount, Icons.percent_rounded),
+                    SegmentedButton<_Discount>(
+                      segments: [
+                        ButtonSegment(
+                            value: _Discount.none, label: Text(l.noDiscount)),
+                        ButtonSegment(
+                            value: _Discount.fraction,
+                            label: Text(l.dropFraction)),
+                        ButtonSegment(
+                            value: _Discount.extra,
+                            label: Text(l.extraDiscount)),
+                      ],
+                      selected: {_discountMode},
+                      showSelectedIcon: false,
+                      onSelectionChanged: (s) =>
+                          setState(() => _discountMode = s.first),
+                    ),
+                    if (_discountMode == _Discount.extra) ...[
+                      const SizedBox(height: 12),
+                      AdaptiveBox(
+                        width: 260,
+                        child: DinarsField(
+                          controller: _discount,
+                          label: l.extraDiscount,
+                          required: false,
+                          allowZero: true,
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                    ],
+                    if (discount > 0) ...[
+                      const SizedBox(height: 10),
+                      Pill(
+                          '${l.finalMaking}: ${formatDinars(making - discount)} ${l.dinarUnit}'),
+                    ],
+                    const SizedBox(height: 8),
+                  ],
+
+                  // ٢) المسترد من المحل — داخل نفس الحركة
+                  section(l.recoveredGoods, Icons.assignment_return_outlined),
+                  for (var i = 0; i < _recovered.length; i++) ...[
+                    GoodsLineCard(
+                      key: ObjectKey(_recovered[i]),
+                      index: i,
+                      title: l.recoveredLine(i + 1),
+                      line: _recovered[i],
+                      items: items,
+                      karats: goodsKarats,
+                      editableFactor: true,
+                      perPieceOption: true,
+                      makingLabel: l.recoveredMaking,
+                      canRemove: true,
+                      onRemove: () =>
+                          setState(() => _recovered.removeAt(i).dispose()),
+                      onChanged: () => setState(() {}),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      onPressed: _busy
+                          ? null
+                          : () => setState(() => _recovered.add(GoodsLineState(
+                              karatId: _recovered.lastOrNull?.karatId))),
+                      icon: const Icon(Icons.add_circle_outline_rounded),
+                      label: Text(l.addRecovered),
+                      style: TextButton.styleFrom(
+                          foregroundColor: AppColors.goldDark),
+                    ),
+                  ),
+
+                  // ٣) الكسر المستلم
                   section(l.receivedScrap, Icons.recycling_rounded),
                   for (var i = 0; i < _scrap.length; i++) ...[
                     GoodsLineCard(
@@ -493,6 +627,8 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
                       title: l.scrapLine(i + 1),
                       line: _scrap[i],
                       karats: scrapKarats,
+                      editableFactor: true,
+                      altKarats: goodsKarats,
                       canRemove: true,
                       onRemove: () =>
                           setState(() => _scrap.removeAt(i).dispose()),
@@ -511,7 +647,7 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
                     ),
                   ),
 
-                  // ٣) النقد المستلم
+                  // ٤) النقد المستلم
                   section(l.receivedCash, Icons.payments_outlined),
                   AdaptiveBox(
                     width: 260,
@@ -541,10 +677,15 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
                           l.soldGoods,
                           '${formatGrams(goodsNet)} ${l.gramsUnit}'
                         ),
+                      if (recoveredNet != 0)
+                        (
+                          l.recoveredGoods,
+                          '${formatGrams(recoveredNet)} ${l.gramsUnit}'
+                        ),
                       if (making != 0)
                         (
                           l.totalMaking,
-                          '${formatDinars(making)} ${l.dinarUnit}'
+                          '${formatDinars(making - discount)} ${l.dinarUnit}'
                         ),
                       if (scrapNet != 0)
                         (

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/connectivity.dart';
+import '../data/gold_repository.dart';
 import '../data/supabase_gold_repository.dart';
 import '../domain/enums.dart';
 import '../domain/models.dart';
@@ -178,4 +179,12 @@ void invalidateAfterPosting(WidgetRef ref) {
   ref.invalidate(allChequesProvider);
   ref.invalidate(todayPostingsProvider);
   ref.invalidate(recentTxProvider);
+  ref.invalidate(lastMakingsProvider);
 }
+
+/// آخر مصنوعية بيع لكل صنف وعيار عند طرف — تُعبّأ تلقائياً عند إعادة البيع.
+final lastMakingsProvider = FutureProvider.autoDispose
+    .family<Map<String, LastMaking>, String>((ref, partyId) async {
+  await ref.watch(tenantProvider.future);
+  return ref.watch(repositoryProvider).lastMakings(partyId);
+});

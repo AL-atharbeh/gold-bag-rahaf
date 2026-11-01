@@ -25,6 +25,13 @@ class GoodsLineState {
   final gross = TextEditingController();
   final TextEditingController making;
 
+  /// المصنوعية للقطعة بدل الغرام — في البيع.
+  bool perPiece = false;
+
+  /// الصنف والعيار اللذان عُبئت لهما آخر مصنوعية، ونص التذكير بها.
+  String? makingKey;
+  String? makingHint;
+
   /// معامل يدوي يتجاوز معامل العيار لهذا البند وحده (مثلاً 0.820).
   /// فارغ = معامل العيار المختار.
   final factor = TextEditingController();
@@ -53,12 +60,15 @@ class GoodsLineState {
         making.text.trim().isEmpty ? 0 : parseDinars(making.text);
     if (makingFils == null || makingFils < 0) return null;
     final qty = int.tryParse(count.text.trim());
+    // المصنوعية للقطعة لا تُحسب بلا عدد
+    if (perPiece && makingFils > 0 && (qty == null || qty <= 0)) return null;
     return GoodsLine.of(
       karat,
       grossWeightMg: grossMg,
       itemId: itemId,
       quantity: (qty == null || qty <= 0) ? null : qty,
       makingPerGramFils: makingFils,
+      makingPerPiece: perPiece,
     );
   }
 
@@ -112,6 +122,20 @@ void ensureKarats(List<GoodsLineState> lines, List<KaratOption> karats) {
   }
 }
 
+/// بنود الذهب: معامل 1.000 افتراضياً، قابل للتعديل.
+void ensurePure(List<GoodsLineState> lines, List<KaratOption> karats) {
+  final pure = karats.where((k) => k.ppm == karatPpmScale).firstOrNull;
+  for (final line in lines) {
+    if (line.karatId != null) continue;
+    if (pure != null) {
+      line.karatId = pure.id;
+    } else {
+      line.karatId = defaultKaratId(karats);
+      line.factor.text = '1.000';
+    }
+  }
+}
+
 class GoodsLineCard extends StatelessWidget {
   const GoodsLineCard({
     super.key,
@@ -130,7 +154,15 @@ class GoodsLineCard extends StatelessWidget {
     this.editableFactor = false,
     this.altKarats = const [],
     this.onAddKarat,
+    this.perPieceOption = false,
+    this.makingLabel,
   });
+
+  /// اختيار المصنوعية للقطعة أو للغرام.
+  final bool perPieceOption;
+
+  /// عنوان خانة المصنوعية إن اختلف عن الافتراضي.
+  final String? makingLabel;
 
   /// في البيع: خانة واحدة "المنتج" (صنف + عيار) بدل خانتي الصنف والعيار.
   final List<ProductOption>? products;
@@ -477,7 +509,23 @@ class GoodsLineCard extends StatelessWidget {
                   },
                 ),
               ),
-              // التعامل مع التجار: العيار والمعامل في قائمة واحدة
+              // البيع: المنتج يحدد العيار، والعيار اللحظي معامل لهذا البند فقط
+              if (products != null && !line.scrap)
+                field(
+                  half: true,
+                  170,
+                  TextFormField(
+                    controller: line.factor,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: decimalInputFormatters,
+                    textDirection: TextDirection.ltr,
+                    decoration: InputDecoration(
+                        labelText: l.instantKarat, hintText: '0.885'),
+                    onChanged: (_) => onChanged(),
+                  ),
+                ),
+              // العيار والمعامل في قائمة واحدة، ومعها العيار اللحظي
               if (editableFactor)
                 field(half: true, 300, _karatFactorDropdown(context))
               else if (line.scrap || products == null)
@@ -543,7 +591,11 @@ class GoodsLineCard extends StatelessWidget {
                     inputFormatters: decimalInputFormatters,
                     textDirection: TextDirection.ltr,
                     decoration: InputDecoration(
-                        labelText: l.makingPerGram, suffixText: l.dinarUnit),
+                        labelText: makingLabel ??
+                            (line.perPiece
+                                ? l.makingPerPiece
+                                : l.makingPerGram),
+                        suffixText: l.dinarUnit),
                     onChanged: (_) => onChanged(),
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return null;
@@ -554,6 +606,29 @@ class GoodsLineCard extends StatelessWidget {
                 ),
             ],
           ),
+          if (perPieceOption && !line.scrap) ...[
+            const SizedBox(height: 10),
+            SegmentedButton<bool>(
+              segments: [
+                ButtonSegment(value: false, label: Text(l.perGram)),
+                ButtonSegment(value: true, label: Text(l.perPiece)),
+              ],
+              selected: {line.perPiece},
+              showSelectedIcon: false,
+              onSelectionChanged: (s) {
+                line.perPiece = s.first;
+                onChanged();
+              },
+            ),
+          ],
+          if (line.makingHint != null) ...[
+            const SizedBox(height: 8),
+            Text(line.makingHint!,
+                style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.goldDark,
+                    fontWeight: FontWeight.w700)),
+          ],
           if (g != null) ...[
             const SizedBox(height: 12),
             Wrap(

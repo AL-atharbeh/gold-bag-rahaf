@@ -28,7 +28,11 @@ class AccountsPage extends ConsumerWidget {
     this.emptyTitle = 'لا يوجد أطراف أو موزّعون بعد',
     this.emptyHint = 'أضف محل عرض أو تاجراً أو مصنعاً للبدء.',
     this.showAppBar = true,
+    this.withWorkshops = false,
   });
+
+  /// صفحة التجار: كل مشغل يظهر فيها باسمه، بحساب وعمليات كالتاجر.
+  final bool withWorkshops;
 
   final AccountKind? kind;
   final String title;
@@ -42,7 +46,11 @@ class AccountsPage extends ConsumerWidget {
     final all = ref.watch(counterpartiesProvider);
     final accounts = kind == null
         ? all
-        : all.whenData((l) => l.where((a) => a.kind == kind).toList());
+        : all.whenData((l) => l
+            .where((a) =>
+                a.kind == kind ||
+                (withWorkshops && a.kind == AccountKind.factory))
+            .toList());
     final balances = ref.watch(balancesProvider);
 
     return Scaffold(
@@ -96,7 +104,8 @@ class AccountsPage extends ConsumerWidget {
         heroTag: 'fab-accounts-${kind?.wire ?? 'all'}',
         onPressed: () => showDialog<bool>(
           context: context,
-          builder: (_) => NewAccountDialog(kind: kind),
+          builder: (_) =>
+              NewAccountDialog(kind: kind, withWorkshop: withWorkshops),
         ),
         icon: const Icon(Icons.person_add_alt_1_rounded),
         label: Text(
@@ -334,7 +343,8 @@ class AccountsPage extends ConsumerWidget {
                               // تسجيل حركة دون فتح الدفتر — أكثر ما يُفعل
                               // في القائمة هو قيد بضاعة أو تسليم.
                               TextButton.icon(
-                                onPressed: () => a.kind == AccountKind.trader
+                                onPressed: () => a.kind == AccountKind.trader ||
+                                        a.kind == AccountKind.factory
                                     ? showTraderOps(context, a)
                                     : a.kind == AccountKind.showroom
                                         ? showShopOps(context, a)

@@ -492,8 +492,8 @@ class _WithdrawalDialogState extends ConsumerState<_WithdrawalDialog> {
     setState(() => _busy = true);
 
     try {
-      final doc = await ref.read(repositoryProvider).payCash(
-            counterpartyId: widget.employee.id,
+      final doc = await ref.read(repositoryProvider).employeeDraw(
+            employeeId: widget.employee.id,
             cashboxId: cashbox,
             amountFils: parseDinars(_amount.text)!,
             occurredAt: _date,

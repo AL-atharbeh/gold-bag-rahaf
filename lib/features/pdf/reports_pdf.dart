@@ -364,8 +364,6 @@ Future<Uint8List> buildSalesPdf({
               ar ? 'صافي المبيعات' : 'Net sales', '${formatGrams(r.netMg)} $g'),
           pdfKv(ar ? 'المصنوعية' : 'Making charges',
               '${formatDinars(r.makingFils)} $jd'),
-          pdfKv(ar ? 'ربح المصنوعية' : 'Making profit',
-              '${formatDinars(r.profitFils)} $jd'),
           pdfKv(ar ? 'عدد الفواتير' : 'Invoices', '${r.invoices}'),
         ])),
         pdfSectionTitle(ar ? 'حسب اليوم' : 'By day'),
@@ -378,16 +376,14 @@ Future<Uint8List> buildSalesPdf({
                     'الفواتير',
                     'القطع',
                     'الصافي ($g)',
-                    'المصنوعية ($jd)',
-                    'الربح ($jd)'
+                    'المصنوعية ($jd)'
                   ]
                 : [
                     'Date',
                     'Invoices',
                     'Pcs',
                     'Net ($g)',
-                    'Making ($jd)',
-                    'Profit ($jd)'
+                    'Making ($jd)'
                   ]),
             for (final e in r.daysSorted)
               pw.TableRow(children: [
@@ -397,7 +393,6 @@ Future<Uint8List> buildSalesPdf({
                     ltr: true),
                 pdfCell(formatGrams(e.value.netMg), ltr: true, bold: true),
                 pdfCell(formatDinars(e.value.makingFils), ltr: true),
-                pdfCell(formatDinars(e.value.profitFils), ltr: true),
               ]),
             pw.TableRow(
               decoration: const pw.BoxDecoration(color: PdfPalette.goldSoft),
@@ -408,7 +403,6 @@ Future<Uint8List> buildSalesPdf({
                     ltr: true, bold: true),
                 pdfCell(formatGrams(r.netMg), ltr: true, bold: true),
                 pdfCell(formatDinars(r.makingFils), ltr: true, bold: true),
-                pdfCell(formatDinars(r.profitFils), ltr: true, bold: true),
               ],
             ),
           ],
@@ -715,10 +709,10 @@ Future<Uint8List> buildDayReportPdf({
                 '${formatDinars(d.chequesInFils)} $jd'),
           pdfKv(ar ? 'المصاريف' : 'Expenses',
               '${formatDinars(d.expensesFils)} $jd'),
-          pdfKv(ar ? 'ربح المصنوعية' : 'Making profit',
-              '${formatDinars(d.makingProfitFils)} $jd'),
-          pdfKv(ar ? 'الربح بعد المصاريف' : 'Profit after expenses',
-              '${formatDinars(d.netProfitFils)} $jd'),
+          pdfKv(ar ? 'مجموع الكاش اليومي' : 'Daily cash total',
+              '${formatDinars(expectedCashFils + d.cashOutFils)} $jd'),
+          pdfKv(ar ? 'الكاش الصافي' : 'Net cash',
+              '${formatDinars(expectedCashFils)} $jd'),
         ])),
         if (d.expenses.isNotEmpty) ...[
           pdfSectionTitle(ar ? 'المصاريف' : 'Expenses'),

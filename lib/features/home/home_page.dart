@@ -136,7 +136,8 @@ class _QuickActions extends ConsumerWidget {
   Future<void> _pickTrader(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;
     final traders = (await ref.read(accountsProvider.future))
-        .where((a) => a.kind == AccountKind.trader)
+        .where((a) =>
+            a.kind == AccountKind.trader || a.kind == AccountKind.factory)
         .toList();
     if (!context.mounted) return;
     if (traders.isEmpty) {
@@ -356,10 +357,15 @@ class _TodayCard extends ConsumerWidget {
             rows,
             bagId: sys[SystemAccount.shanta],
             cashboxId: sys[SystemAccount.cashbox],
-            makingIncomeId: sys[SystemAccount.makingIncome],
             expensesId: sys[SystemAccount.expenses],
             chequesId: sys[SystemAccount.cheques],
           );
+          final netCash = (ref.watch(balancesProvider).valueOrNull ??
+                      const <AccountBalance>[])
+                  .where((b) => b.accountId == sys[SystemAccount.cashbox])
+                  .firstOrNull
+                  ?.cashFils ??
+              0;
           if (d.txCount == 0) {
             return Text(l.noMovesToday,
                 style: const TextStyle(color: AppColors.textMuted));
@@ -368,11 +374,11 @@ class _TodayCard extends ConsumerWidget {
             _Stat(l.todaySales, '${formatGrams(d.soldNetMg)} $g',
                 sub: d.soldPieces > 0 ? l.piecesCount(d.soldPieces) : null,
                 color: AppColors.goldDark),
-            _Stat(l.makingProfit, '${formatDinars(d.makingProfitFils)} $jd',
-                sub: d.expensesFils == 0
-                    ? null
-                    : '${l.afterExpenses}: ${formatDinars(d.netProfitFils)}',
-                color: d.makingProfitFils < 0 ? AppColors.error : null),
+            _Stat(l.dailyCashTotal,
+                '${formatDinars(netCash + d.cashOutFils)} $jd',
+                sub: l.dailyCashHint),
+            _Stat(l.netCash, '${formatDinars(netCash)} $jd',
+                color: AppColors.goldDark),
             _Stat(l.cashIn, '${formatDinars(d.cashInFils)} $jd'),
             _Stat(l.expensesToday, '${formatDinars(d.expensesFils)} $jd',
                 sub: d.cashOutFils - d.expensesFils == 0
@@ -419,13 +425,33 @@ class _BagCard extends ConsumerWidget {
           final pieces = goods.fold<int>(0, (a, r) => a + r.quantity);
           final net = goods.fold<int>(0, (a, r) => a + r.netMg);
           final scrapNet = scrap.fold<int>(0, (a, r) => a + r.netMg);
-          return _statGrid([
-            _Stat(l.totalPieces, '$pieces'),
-            _Stat(l.totalNet, '${formatGrams(net)} ${l.gramsUnit}',
-                color: AppColors.goldDark),
-            _Stat(l.scrapInBag, '${formatGrams(scrapNet)} ${l.gramsUnit}'),
-            _Stat(l.bagCapital, '${formatDinars(capital)} ${l.dinarUnit}'),
-          ]);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _statGrid([
+                _Stat(l.totalPieces, '$pieces'),
+                _Stat(l.totalNet, '${formatGrams(net)} ${l.gramsUnit}',
+                    color: AppColors.goldDark),
+                _Stat(l.scrapInBag, '${formatGrams(scrapNet)} ${l.gramsUnit}'),
+                _Stat(l.bagCapital, '${formatDinars(capital)} ${l.dinarUnit}'),
+              ]),
+              // الكسر مفروزاً بعياراته
+              if (scrap.any((r) => r.grossMg != 0)) ...[
+                const SizedBox(height: 10),
+                Wrap(spacing: 8, runSpacing: 6, children: [
+                  for (final r in scrap)
+                    if (r.grossMg != 0)
+                      Pill(
+                        '${r.karatName ?? l.scrapInBag}: '
+                        '${formatGrams(r.grossMg)} ${l.gramsUnit}'
+                        ' · ${l.net24} ${formatGrams(r.netMg)}',
+                        fg: AppColors.textSecondary,
+                        bg: AppColors.surfaceMuted,
+                      ),
+                ]),
+              ],
+            ],
+          );
         },
       ),
     );
@@ -479,7 +505,8 @@ class _ReceivablesCard extends ConsumerWidget {
           final top = all
               .where((b) =>
                   (b.kind == AccountKind.showroom ||
-                      b.kind == AccountKind.trader) &&
+                      b.kind == AccountKind.trader ||
+                      b.kind == AccountKind.factory) &&
                   b.goldMg > 0)
               .toList()
             ..sort((a, b) => b.goldMg.compareTo(a.goldMg));

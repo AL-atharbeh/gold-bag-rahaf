@@ -6,6 +6,7 @@ import '../../app/theme.dart';
 import '../../core/locale.dart';
 import '../../core/units.dart';
 import '../../domain/enums.dart';
+import '../../domain/ledger.dart';
 import '../../domain/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform/labels.dart';
@@ -81,14 +82,28 @@ class TransactionDetailPage extends ConsumerWidget {
               gold.where((x) => x.itemName == null && x.amount < 0).toList();
           final scrapOut =
               gold.where((x) => x.itemName == null && x.amount > 0).toList();
-          final making =
-              cash.where((x) => x.makingPerGramFils != null).toList();
-          final cashIn = cash
-              .where((x) => x.makingPerGramFils == null && x.amount < 0)
+          bool isFix(TxLine x) =>
+              x.note == noteFixGold || x.note == noteFixScrap;
+          bool special(TxLine x) =>
+              x.makingPerGramFils != null ||
+              x.note == noteMakingDiscount ||
+              x.note == noteExchangeFee ||
+              isFix(x);
+          final making = cash
+              .where((x) =>
+                  x.makingPerGramFils != null && x.note != noteRecoveredMaking)
               .toList();
-          final cashOut = cash
-              .where((x) => x.makingPerGramFils == null && x.amount > 0)
-              .toList();
+          final recoveredMaking =
+              cash.where((x) => x.note == noteRecoveredMaking).toList();
+          final discount =
+              cash.where((x) => x.note == noteMakingDiscount).toList();
+          final exchangeFee =
+              cash.where((x) => x.note == noteExchangeFee).toList();
+          final fixValue = cash.where(isFix).toList();
+          final cashIn =
+              cash.where((x) => !special(x) && x.amount < 0).toList();
+          final cashOut =
+              cash.where((x) => !special(x) && x.amount > 0).toList();
 
           final goldTotal = gold.fold<int>(0, (a, x) => a + x.amount);
           final cashTotal = cash.fold<int>(0, (a, x) => a + x.amount);
@@ -115,7 +130,9 @@ class TransactionDetailPage extends ConsumerWidget {
                         _GoodsSection(
                             title: tx.type == TxType.goodsReturn
                                 ? l.returnedGoods
-                                : l.receivedGoods,
+                                : tx.type == TxType.sale
+                                    ? l.recoveredGoods
+                                    : l.receivedGoods,
                             lines: goodsIn,
                             l: l),
                       if (scrapIn.isNotEmpty)
@@ -130,6 +147,25 @@ class TransactionDetailPage extends ConsumerWidget {
                             lines: making,
                             l: l,
                             showRate: true),
+                      if (recoveredMaking.isNotEmpty)
+                        _CashSection(
+                            title: l.recoveredMaking,
+                            lines: recoveredMaking,
+                            l: l,
+                            showRate: true),
+                      if (discount.isNotEmpty)
+                        _CashSection(
+                            title: l.makingDiscount, lines: discount, l: l),
+                      if (exchangeFee.isNotEmpty)
+                        _CashSection(
+                            title: l.exchangeFee, lines: exchangeFee, l: l),
+                      if (fixValue.isNotEmpty)
+                        _CashSection(
+                            title: fixValue.first.note == noteFixScrap
+                                ? '${l.opFix} — ${l.fixClassScrap}'
+                                : '${l.opFix} — ${l.fixClassGold}',
+                            lines: fixValue,
+                            l: l),
                       if (cashIn.isNotEmpty)
                         _CashSection(
                             title: l.receivedCash, lines: cashIn, l: l),
@@ -157,10 +193,9 @@ class TransactionDetailPage extends ConsumerWidget {
                         _Notice(l.txIsReversed, error: true)
                       else
                         Wrap(spacing: 12, runSpacing: 10, children: [
-                          if ((tx.type == TxType.sale ||
-                                  tx.type == TxType.goodsIn) &&
-                              goodsWithMaking(tx, partyId,
-                                      fromShop: tx.type != TxType.goodsIn)
+                          // البيع للمحل يُسترد منه داخل حركة البيع نفسها
+                          if (tx.type == TxType.goodsIn &&
+                              goodsWithMaking(tx, partyId, fromShop: false)
                                   .isNotEmpty)
                             FilledButton.icon(
                               onPressed: () => _partialReturn(context, ref, tx),
@@ -529,7 +564,7 @@ class _CashSection extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text(
-                    '${formatDinars(x.makingPerGramFils!)} ${l.dinarUnit} / ${l.gramsUnit}'
+                    '${formatDinars(x.makingPerGramFils!)} ${l.dinarUnit} / ${x.note == noteMakingPiece ? l.perPiece : l.gramsUnit}'
                     '  =  ${formatDinars(x.amount.abs())} ${l.dinarUnit}',
                     style: const TextStyle(
                         fontSize: 13, color: AppColors.textSecondary),
@@ -538,7 +573,7 @@ class _CashSection extends StatelessWidget {
             ] else if (showRate) ...[
               const SizedBox(height: 6),
               Text(
-                  '${formatDinars(lines.first.makingPerGramFils!)} ${l.dinarUnit} / ${l.gramsUnit}',
+                  '${formatDinars(lines.first.makingPerGramFils!)} ${l.dinarUnit} / ${lines.first.note == noteMakingPiece ? l.perPiece : l.gramsUnit}',
                   style: const TextStyle(
                       fontSize: 13, color: AppColors.textSecondary)),
             ],

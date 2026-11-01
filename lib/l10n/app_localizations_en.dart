@@ -687,7 +687,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get karatAndFactor => 'Karat & factor';
 
   @override
-  String get otherFactor => 'Other factor…';
+  String get otherFactor => 'Instant karat (this operation only)…';
 
   @override
   String get tabDistributors => 'Distributors';
@@ -1218,7 +1218,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutEdition => 'About';
 
   @override
-  String get editionVersion => 'Bag trader edition · 1.1.1';
+  String get editionVersion => 'Bag trader edition · 1.2.0';
 
   @override
   String get support => 'Support';
@@ -1562,4 +1562,191 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get expenseHint =>
       'The amount is deducted from the bag cash and shown in today\'s expenses and reports.';
+
+  @override
+  String get instantKarat => 'Instant karat';
+
+  @override
+  String get makingPerPiece => 'Making / piece';
+
+  @override
+  String get perGram => 'Per gram';
+
+  @override
+  String get perPiece => 'Per piece';
+
+  @override
+  String get makingDiscount => 'Making discount';
+
+  @override
+  String get noDiscount => 'No discount';
+
+  @override
+  String get dropFraction => 'Drop fraction';
+
+  @override
+  String get extraDiscount => 'Extra discount';
+
+  @override
+  String get finalMaking => 'Final making';
+
+  @override
+  String get recoveredGoods => 'Recovered goods';
+
+  @override
+  String get recoveredMaking => 'Recovered making';
+
+  @override
+  String get addRecovered => 'Add recovered';
+
+  @override
+  String get dailyCashTotal => 'Daily cash total';
+
+  @override
+  String get dailyCashHint => 'Opening cash + received';
+
+  @override
+  String get netCash => 'Net cash';
+
+  @override
+  String get fixClass => 'Fix type';
+
+  @override
+  String get fixClassGold => 'Gold';
+
+  @override
+  String get fixClassScrap => 'Scrap';
+
+  @override
+  String get fixCashNow => 'Cash now (optional)';
+
+  @override
+  String get fixCashHint => 'All, part or zero — the rest stays on account.';
+
+  @override
+  String get fixWithTrader => 'Fix with a trader (optional)';
+
+  @override
+  String get noTrader => 'No trader';
+
+  @override
+  String get traderGrams => 'Trader grams';
+
+  @override
+  String get traderFixHint => 'Empty = same grams and price as the shop.';
+
+  @override
+  String get opReceiveGold => 'Receive gold';
+
+  @override
+  String get opReceiveGoldDesc =>
+      'Into the bag at any karat, factor 1.000 by default';
+
+  @override
+  String get opDeliverGold => 'Deliver gold';
+
+  @override
+  String get opDeliverGoldDesc =>
+      'Out of the bag at any karat, factor 1.000 by default';
+
+  @override
+  String get opLira => 'Sell lira with fees';
+
+  @override
+  String get opLiraDesc => 'Gross weight, per-piece fees for us';
+
+  @override
+  String get opExchange => 'Gold exchange';
+
+  @override
+  String get opExchangeDesc => 'Receive and deliver with per-gram fees';
+
+  @override
+  String get liraFromBag => 'Leaves the bag';
+
+  @override
+  String get liraFromBagHint => 'Turn on if the lira is from bag stock.';
+
+  @override
+  String get liraFee => 'Fee / piece';
+
+  @override
+  String get liraCountNeeded => 'Enter the count to compute fees.';
+
+  @override
+  String get exchangeReceived => 'Gold received';
+
+  @override
+  String get exchangeDelivered => 'Gold delivered (optional)';
+
+  @override
+  String get exchangeDeliveredHint =>
+      'Whatever is not delivered stays on balance.';
+
+  @override
+  String get exchangeFee => 'Exchange fee';
+
+  @override
+  String get exchangeFeePerGram => 'Fee / gram';
+
+  @override
+  String get feeForUs => 'For us';
+
+  @override
+  String get feeOnUs => 'On us';
+
+  @override
+  String get openingBalances => 'Opening balances';
+
+  @override
+  String get openingBalancesHint =>
+      'Prior balances for parties, and bag contents';
+
+  @override
+  String get openingBag => 'Bag at start';
+
+  @override
+  String get openingBagHint => 'Goods, scrap and cash on hand';
+
+  @override
+  String get openingGold => 'Gold balance (net 24K)';
+
+  @override
+  String get openingCash => 'Cash balance';
+
+  @override
+  String get openingForUs => 'He owes us';
+
+  @override
+  String get openingForHim => 'We owe him';
+
+  @override
+  String openingSaved(String doc) {
+    return 'Balance saved — $doc';
+  }
+
+  @override
+  String get bagMovements => 'Movements';
+
+  @override
+  String get allMovements => 'All';
+
+  @override
+  String get movementsIn => 'Into the bag';
+
+  @override
+  String get movementsOut => 'Out of the bag';
+
+  @override
+  String get noBagMovements => 'No movements in this period';
+
+  @override
+  String lastMakingHint(String rate, String unit) {
+    return 'Last making for this shop: $rate $unit — editable';
+  }
+
+  @override
+  String recoveredLine(int n) {
+    return 'Recovered $n';
+  }
 }

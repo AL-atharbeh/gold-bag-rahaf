@@ -63,7 +63,6 @@ final daySummaryProvider =
     rows,
     bagId: sys[SystemAccount.shanta],
     cashboxId: sys[SystemAccount.cashbox],
-    makingIncomeId: sys[SystemAccount.makingIncome],
     expensesId: sys[SystemAccount.expenses],
     chequesId: sys[SystemAccount.cheques],
   );

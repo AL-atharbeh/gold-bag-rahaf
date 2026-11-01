@@ -74,14 +74,12 @@ void main() {
         to: DateTime(2026, 10, 31),
         postings: postings,
         bagId: 'bag',
-        makingIncomeId: 'income',
       );
       expect(r.sold.netMg, 8850);
       expect(r.sold.pieces, 2);
       expect(r.returned.netMg, 4425);
       expect(r.netMg, 4425);
       expect(r.makingFils, 7500);
-      expect(r.profitFils, 11000);
       expect(r.invoices, 1);
       expect(r.daysSorted.length, 2);
       expect(r.partiesSorted.single.netMg, 4425);

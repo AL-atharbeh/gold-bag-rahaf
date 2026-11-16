@@ -23,7 +23,8 @@ import 'transaction_detail_page.dart';
 class _Movement {
   _Movement(this.line);
 
-  final StatementLine line;
+  /// سطر يمثّل الحركة — سطر التسكير إن وُجد، فيظهر تصنيفه أياً كان ترتيب السطور.
+  StatementLine line;
   int gold = 0;
   int cash = 0;
   int goldAfter = 0;
@@ -175,6 +176,7 @@ class PartyLedgerPage extends ConsumerWidget {
     final byTx = <String, _Movement>{};
     for (final s in lines) {
       final m = byTx.putIfAbsent(s.txId, () => _Movement(s));
+      if (s.note == noteFixGold || s.note == noteFixScrap) m.line = s;
       if (s.ledger == LedgerKind.gold) {
         m.gold += s.amount;
       } else {

@@ -21,11 +21,8 @@ class StatementRow {
   TxType get type => first.txType;
   bool get isReversed => first.isReversed;
 
-  /// تصنيف التسكير إن وُجد: حلة أو كسر.
-  String? get fixClass =>
-      first.note == noteFixGold || first.note == noteFixScrap
-          ? first.note
-          : null;
+  /// تصنيف التسكير إن وُجد: حلة أو كسر — من أي سطر في الحركة.
+  String? fixClass;
 }
 
 /// كشف حساب طرف لفترة: الرصيد السابق أولاً، ثم حركات الفترة، ثم الرصيد الختامي.
@@ -67,6 +64,7 @@ class AccountStatement {
       }
       if (!s.occurredAt.isBefore(end)) continue;
       final r = byTx.putIfAbsent(s.txId, () => StatementRow(s));
+      if (s.note == noteFixGold || s.note == noteFixScrap) r.fixClass = s.note;
       if (s.ledger == LedgerKind.gold) {
         r.gold += s.amount;
         final g = s.grossWeightMg;

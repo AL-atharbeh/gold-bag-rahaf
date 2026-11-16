@@ -443,7 +443,9 @@ class SupabaseGoldRepository implements GoldRepository {
         TxType.goldPayment,
         partyId,
         occurredAt,
-        note,
+        // "بدل" في ملاحظة الحركة: يميّزها عن دفعة الذهب العادية في الكشف
+        [noteExchange, if (note != null && note.trim().isNotEmpty) note.trim()]
+            .join(' — '),
         _builder.exchange(
           partyId: partyId,
           bagAccountId: bagAccountId,

@@ -25,6 +25,7 @@ const noteRecoveredMaking = 'مصنوعية مسترد';
 const noteFixGold = 'تسكير حلة';
 const noteFixScrap = 'تسكير كسر';
 const noteExchangeFee = 'أجور بدل';
+const noteExchange = 'بدل';
 const noteEmployeeDraw = 'سحب موظف';
 const noteSalaryPay = 'صرف راتب';
 

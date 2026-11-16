@@ -179,12 +179,30 @@ void invalidateAfterPosting(WidgetRef ref) {
   ref.invalidate(allChequesProvider);
   ref.invalidate(todayPostingsProvider);
   ref.invalidate(recentTxProvider);
-  ref.invalidate(lastMakingsProvider);
+  ref.invalidate(recentMakingsProvider);
+  ref.invalidate(employeeLinesProvider);
 }
 
-/// آخر مصنوعية بيع لكل صنف وعيار عند طرف — تُعبّأ تلقائياً عند إعادة البيع.
-final lastMakingsProvider = FutureProvider.autoDispose
-    .family<Map<String, LastMaking>, String>((ref, partyId) async {
+/// حركات الموظف لحساب راتبه: كلها من تاريخ بداية الراتب، وإلا آخرها.
+final employeeLinesProvider = FutureProvider.autoDispose
+    .family<List<StatementLine>, ({String id, DateTime? start})>(
+        (ref, e) async {
   await ref.watch(tenantProvider.future);
-  return ref.watch(repositoryProvider).lastMakings(partyId);
+  final repo = ref.watch(repositoryProvider);
+  final start = e.start;
+  return start == null
+      ? repo.statement(e.id)
+      : repo.statementSince(e.id, start);
+});
+
+/// محل + صنف + عيار.
+typedef MakingKey = ({String partyId, String itemId, String karatId});
+
+/// آخر 3 مصنوعيات بيع بها هذا الصنف لهذا المحل — الأحدث يُعبّأ تلقائياً.
+final recentMakingsProvider = FutureProvider.autoDispose
+    .family<List<LastMaking>, MakingKey>((ref, k) async {
+  await ref.watch(tenantProvider.future);
+  return ref
+      .watch(repositoryProvider)
+      .recentMakings(k.partyId, k.itemId, k.karatId);
 });

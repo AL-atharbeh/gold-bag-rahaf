@@ -785,9 +785,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bagsDesc => 'Bags and their holders';
 
   @override
-  String get subscription => 'Subscription';
-
-  @override
   String get adminDashboard => 'Admin dashboard';
 
   @override
@@ -796,9 +793,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get registerAnotherOrgDesc =>
       'e.g. an independent account alongside your factory membership';
-
-  @override
-  String get planLabel => 'Plan';
 
   @override
   String get endsOn => 'Ends on';
@@ -810,24 +804,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String daysLeft(int days) {
     return '$days days left';
   }
-
-  @override
-  String get usersLimit => 'Users';
-
-  @override
-  String get bagsLimit => 'Bags';
-
-  @override
-  String get renewHint => 'To renew or change your plan, contact the app team.';
-
-  @override
-  String subscriptionExpiring(int days) {
-    return 'Your subscription ends in $days days';
-  }
-
-  @override
-  String get subscriptionExpired =>
-      'Subscription expired — read-only until renewed';
 
   @override
   String seatsUsed(int used, int max) {
@@ -914,9 +890,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminOrgs => 'Organizations';
 
   @override
-  String get adminPlans => 'Plans';
-
-  @override
   String get statPending => 'Awaiting activation';
 
   @override
@@ -924,9 +897,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statExpiring => 'Expiring in 14 days';
-
-  @override
-  String get statExpired => 'Expired';
 
   @override
   String get statSuspended => 'Suspended';
@@ -993,15 +963,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activityLog => 'Activity log';
 
   @override
-  String get editPlan => 'Edit plan';
-
-  @override
-  String get newPlan => 'New plan';
-
-  @override
-  String get planCode => 'Code';
-
-  @override
   String get nameAr => 'Arabic name';
 
   @override
@@ -1011,9 +972,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get price => 'Price (JOD)';
 
   @override
-  String get periodMonths => 'Period (months)';
-
-  @override
   String get maxUsers => 'Max users';
 
   @override
@@ -1021,9 +979,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get extraBagPrice => 'Extra bag price (JOD)';
-
-  @override
-  String get planActive => 'Plan available';
 
   @override
   String perPeriod(String price, int months) {
@@ -1218,7 +1173,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutEdition => 'About';
 
   @override
-  String get editionVersion => 'Bag trader edition · 1.2.0';
+  String get editionVersion => 'Bag trader edition · 1.3.0';
 
   @override
   String get support => 'Support';
@@ -1624,10 +1579,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fixCashHint => 'All, part or zero — the rest stays on account.';
 
   @override
-  String get fixWithTrader => 'Fix with a trader (optional)';
+  String get fixWithTrader => 'Fix with a trader or workshop (optional)';
 
   @override
-  String get noTrader => 'No trader';
+  String get noTrader => 'No trader or workshop';
 
   @override
   String get traderGrams => 'Trader grams';
@@ -1749,4 +1704,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String recoveredLine(int n) {
     return 'Recovered $n';
   }
+
+  @override
+  String get tabExpenses => 'Expenses';
+
+  @override
+  String get expensesTitle => 'Expenses';
+
+  @override
+  String get noExpenses => 'No expenses in this period';
+
+  @override
+  String get expensesTotal => 'Total expenses';
+
+  @override
+  String get expensesOnEmployees => 'Charged to employees';
+
+  @override
+  String get expenseOnEmployee => 'Charge to an employee (optional)';
+
+  @override
+  String get noEmployee => 'No employee';
+
+  @override
+  String get expenseEmployeeHint =>
+      'Paid from the bag cash, deducted from the employee\'s salary, and shown in today\'s expenses.';
+
+  @override
+  String get fixInSale => 'Fix price with the sale (optional)';
+
+  @override
+  String get fixInSaleHint =>
+      'Fix the shop\'s grams in the same invoice, optionally against a trader or workshop.';
+
+  @override
+  String get fixGrams => 'Grams to fix (net)';
+
+  @override
+  String get fixNeedsGramsPrice =>
+      'Enter the fix grams and price, or switch the fix off.';
+
+  @override
+  String get fixSpread => 'Price difference';
 }

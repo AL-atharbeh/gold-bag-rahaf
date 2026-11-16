@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gold_bashar/app/providers.dart';
 import 'package:gold_bashar/domain/enums.dart';
 import 'package:gold_bashar/domain/models.dart';
+import 'package:gold_bashar/features/expenses/expenses_tab.dart';
 import 'package:gold_bashar/features/accounts/accounts_page.dart';
 import 'package:gold_bashar/features/shell/app_shell.dart';
 import 'package:gold_bashar/l10n/app_localizations.dart';
@@ -99,6 +100,8 @@ Widget _wrap(Widget child) => ProviderScope(
         systemAccountsProvider.overrideWith((ref) => _system),
         balancesProvider.overrideWith((ref) => Stream.value(_balances)),
         statementProvider.overrideWith((ref, id) => <StatementLine>[]),
+        cashboxPostingsProvider.overrideWith((ref, r) => <PeriodPosting>[]),
+        employeesProvider.overrideWith((ref) => <Account>[]),
         allChequesProvider.overrideWith((ref) => <Cheque>[]),
         pendingChequesProvider.overrideWith((ref) => <Cheque>[]),
         activeMembershipProvider.overrideWithValue(_owner),

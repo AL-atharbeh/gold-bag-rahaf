@@ -775,9 +775,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bagsDesc => 'الشنط وحاملوها';
 
   @override
-  String get subscription => 'الاشتراك';
-
-  @override
   String get adminDashboard => 'لوحة الإدارة';
 
   @override
@@ -786,9 +783,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get registerAnotherOrgDesc =>
       'مثلاً حساب مستقل إلى جانب عضويتك في مصنع';
-
-  @override
-  String get planLabel => 'الباقة';
 
   @override
   String get endsOn => 'ينتهي في';
@@ -800,24 +794,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String daysLeft(int days) {
     return 'متبقٍّ $days يوم';
   }
-
-  @override
-  String get usersLimit => 'المستخدمون';
-
-  @override
-  String get bagsLimit => 'الشنط';
-
-  @override
-  String get renewHint => 'للتجديد أو تغيير الباقة تواصل مع إدارة التطبيق.';
-
-  @override
-  String subscriptionExpiring(int days) {
-    return 'ينتهي اشتراكك خلال $days يوم';
-  }
-
-  @override
-  String get subscriptionExpired =>
-      'انتهى الاشتراك — الحساب للقراءة فقط حتى التجديد';
 
   @override
   String seatsUsed(int used, int max) {
@@ -902,9 +878,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminOrgs => 'المنشآت';
 
   @override
-  String get adminPlans => 'الباقات';
-
-  @override
   String get statPending => 'بانتظار التفعيل';
 
   @override
@@ -912,9 +885,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statExpiring => 'تنتهي خلال 14 يوماً';
-
-  @override
-  String get statExpired => 'اشتراك منتهٍ';
 
   @override
   String get statSuspended => 'موقوفة';
@@ -981,15 +951,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get activityLog => 'سجل النشاط';
 
   @override
-  String get editPlan => 'تعديل الباقة';
-
-  @override
-  String get newPlan => 'باقة جديدة';
-
-  @override
-  String get planCode => 'الرمز';
-
-  @override
   String get nameAr => 'الاسم بالعربية';
 
   @override
@@ -999,9 +960,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get price => 'السعر (د.أ)';
 
   @override
-  String get periodMonths => 'مدة الاشتراك (أشهر)';
-
-  @override
   String get maxUsers => 'الحد الأقصى للمستخدمين';
 
   @override
@@ -1009,9 +967,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get extraBagPrice => 'سعر الشنطة الإضافية (د.أ)';
-
-  @override
-  String get planActive => 'الباقة متاحة';
 
   @override
   String perPeriod(String price, int months) {
@@ -1205,7 +1160,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get aboutEdition => 'عن النسخة';
 
   @override
-  String get editionVersion => 'نسخة تاجر الشنطة · 1.2.0';
+  String get editionVersion => 'نسخة تاجر الشنطة · 1.3.0';
 
   @override
   String get support => 'الدعم';
@@ -1611,10 +1566,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fixCashHint => 'كله أو جزء منه أو صفر — والباقي يبقى ذمة.';
 
   @override
-  String get fixWithTrader => 'تسكير مع تاجر (اختياري)';
+  String get fixWithTrader => 'تسكير مع تاجر أو مشغل (اختياري)';
 
   @override
-  String get noTrader => 'بدون تاجر';
+  String get noTrader => 'بدون تاجر أو مشغل';
 
   @override
   String get traderGrams => 'غرامات التاجر';
@@ -1735,4 +1690,46 @@ class AppLocalizationsAr extends AppLocalizations {
   String recoveredLine(int n) {
     return 'مسترد $n';
   }
+
+  @override
+  String get tabExpenses => 'المصاريف';
+
+  @override
+  String get expensesTitle => 'المصاريف';
+
+  @override
+  String get noExpenses => 'لا مصاريف في هذه الفترة';
+
+  @override
+  String get expensesTotal => 'مجموع المصاريف';
+
+  @override
+  String get expensesOnEmployees => 'منها باسم الموظفين';
+
+  @override
+  String get expenseOnEmployee => 'على حساب موظف (اختياري)';
+
+  @override
+  String get noEmployee => 'بدون موظف';
+
+  @override
+  String get expenseEmployeeHint =>
+      'يخرج من كاش الشنطة ويُخصم من راتب الموظف، ويظهر في مصاريف اليوم.';
+
+  @override
+  String get fixInSale => 'تسكير مع البيع (اختياري)';
+
+  @override
+  String get fixInSaleHint =>
+      'تسكير غرامات المحل في نفس الفاتورة، ومعه تاجر أو مشغل إن أردت.';
+
+  @override
+  String get fixGrams => 'غرامات التسكير (صافي)';
+
+  @override
+  String get fixNeedsGramsPrice =>
+      'أدخل غرامات التسكير وسعره، أو أطفئ التسكير.';
+
+  @override
+  String get fixSpread => 'فرق السعر';
 }

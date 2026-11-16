@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme.dart';
 import '../../core/locale.dart';
 import '../../core/units.dart';
+import '../../data/gold_repository.dart';
 import '../../domain/ledger.dart';
 import '../../domain/models.dart';
 import '../common/inputs.dart';
@@ -31,6 +32,9 @@ class GoodsLineState {
   /// الصنف والعيار اللذان عُبئت لهما آخر مصنوعية، ونص التذكير بها.
   String? makingKey;
   String? makingHint;
+
+  /// آخر مصنوعيات بيع بها هذا الصنف لهذا المحل — للاختيار بلمسة.
+  List<LastMaking> recent = const [];
 
   /// معامل يدوي يتجاوز معامل العيار لهذا البند وحده (مثلاً 0.820).
   /// فارغ = معامل العيار المختار.
@@ -628,6 +632,25 @@ class GoodsLineCard extends StatelessWidget {
                     fontSize: 12,
                     color: AppColors.goldDark,
                     fontWeight: FontWeight.w700)),
+          ],
+          if (line.recent.length > 1) ...[
+            const SizedBox(height: 6),
+            Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final m in line.recent)
+                ActionChip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text(
+                    '${formatDinars(m.rateFils)} / ${m.perPiece ? l.perPiece : l.perGram}'
+                    '${m.at == null ? '' : ' · ${m.at!.day}/${m.at!.month}'}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onPressed: () {
+                    line.making.text = formatDinars(m.rateFils);
+                    line.perPiece = m.perPiece;
+                    onChanged();
+                  },
+                ),
+            ]),
           ],
           if (g != null) ...[
             const SizedBox(height: 12),

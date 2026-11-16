@@ -5,14 +5,17 @@ import '../../app/providers.dart';
 import '../../app/theme.dart';
 import '../../core/dates.dart';
 import '../../core/units.dart';
-import '../../domain/enums.dart';
 import '../../domain/models.dart';
+import '../../domain/payroll.dart';
 import 'employee_sheet_page.dart';
 import 'new_employee_dialog.dart';
 
-/// قائمة الموظفين — لكل واحد راتبه وما سحبه في الشهر الجاري.
+/// قائمة الموظفين — لكل واحد راتبه وما خُصم منه في دورته الحالية.
 class EmployeesPage extends ConsumerWidget {
-  const EmployeesPage({super.key});
+  const EmployeesPage({super.key, this.showAppBar = true});
+
+  /// داخل تبويب "المصاريف والموظفون" لا شريط علوي خاص.
+  final bool showAppBar;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,7 +23,9 @@ class EmployeesPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      appBar: !showAppBar
+          ? null
+          : AppBar(
         title: const Text('الموظفون'),
         actions: [
           IconButton(
@@ -80,7 +85,7 @@ class EmployeesPage extends ConsumerWidget {
                           size: 18, color: AppColors.textSecondary),
                       const SizedBox(width: 8),
                       Text(
-                        'شهر ${monthLabel(DateTime.now())}',
+                        'الدورة الحالية — ${monthLabel(DateTime.now())}',
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -109,19 +114,19 @@ class _EmployeeTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statement = ref.watch(statementProvider(employee.id));
-    final now = DateTime.now();
-
-    final withdrawn = statement.valueOrNull
-            ?.where((l) =>
-                l.ledger == LedgerKind.cash &&
-                !l.isReversed &&
-                inSameMonth(l.occurredAt, now))
-            .fold<int>(0, (a, l) => a + l.amount) ??
-        0;
+    final start = employee.salaryStartDate;
+    final lines =
+        ref.watch(employeeLinesProvider((id: employee.id, start: start)));
+    final sheet = PayrollSheet.of(
+      lines.valueOrNull ?? const [],
+      period: salaryPeriodOf(DateTime.now(), startDate: start),
+      monthlySalaryFils: employee.monthlySalaryFils,
+      startDate: start,
+    );
 
     final salary = employee.monthlySalaryFils;
-    final remaining = salary - withdrawn;
+    final withdrawn = sheet.deductedFils;
+    final remaining = sheet.remainingFils;
     final overdrawn = salary > 0 && remaining < 0;
 
     return Padding(
@@ -183,7 +188,7 @@ class _EmployeeTile extends ConsumerWidget {
                           salary == 0
                               ? 'الراتب غير محدَّد'
                               : 'الراتب ${formatDinars(salary)} د.أ  ·  '
-                                  'المسحوب ${formatDinars(withdrawn)}',
+                                  'المخصوم ${formatDinars(withdrawn)}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,

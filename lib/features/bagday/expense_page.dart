@@ -6,6 +6,7 @@ import '../../app/theme.dart';
 import '../../core/locale.dart';
 import '../../core/units.dart';
 import '../../domain/enums.dart';
+import '../../domain/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/inputs.dart';
 import '../common/ui.dart';
@@ -30,8 +31,14 @@ IconData expenseIcon(ExpenseCategory? c) => switch (c) {
     };
 
 /// مصروف من كاش الشنطة: بند + مبلغ + ملاحظة.
+///
+/// على حساب موظف (اختياري): يخرج من كاش الشنطة ويُخصم من راتبه، ويبقى
+/// ضمن مصاريف اليوم.
 class ExpensePage extends ConsumerStatefulWidget {
-  const ExpensePage({super.key});
+  const ExpensePage({super.key, this.employee});
+
+  /// الموظف مختار مسبقاً — من كشف راتبه.
+  final Account? employee;
 
   @override
   ConsumerState<ExpensePage> createState() => _ExpensePageState();
@@ -42,6 +49,7 @@ class _ExpensePageState extends ConsumerState<ExpensePage> {
   final _amount = TextEditingController();
   final _note = TextEditingController();
   ExpenseCategory _cat = ExpenseCategory.fuel;
+  late String? _employeeId = widget.employee?.id;
   DateTime _date = DateTime.now();
   bool _saving = false;
 
@@ -68,15 +76,27 @@ class _ExpensePageState extends ConsumerState<ExpensePage> {
       if (cashbox == null || expenses == null) {
         throw Exception(l.needMigration14);
       }
-      final doc = await ref.read(repositoryProvider).addExpense(
-            cashboxId: cashbox,
-            expensesId: expenses,
-            amountFils: parseDinars(_amount.text)!,
-            category: _cat,
-            label: expenseLabel(l, _cat),
-            note: _note.text,
-            occurredAt: _date,
-          );
+      final repo = ref.read(repositoryProvider);
+      final employee = _employeeId;
+      final doc = employee != null
+          ? await repo.employeeDraw(
+              employeeId: employee,
+              cashboxId: cashbox,
+              amountFils: parseDinars(_amount.text)!,
+              label: expenseLabel(l, _cat),
+              note: _note.text,
+              occurredAt: _date,
+            )
+          : await repo.addExpense(
+              cashboxId: cashbox,
+              expensesId: expenses,
+              amountFils: parseDinars(_amount.text)!,
+              category: _cat,
+              label: expenseLabel(l, _cat),
+              note: _note.text,
+              occurredAt: _date,
+            );
+      invalidateAfterPosting(ref);
       invalidateBagDay(ref);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -99,6 +119,8 @@ class _ExpensePageState extends ConsumerState<ExpensePage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final employees =
+        ref.watch(employeesProvider).valueOrNull ?? const <Account>[];
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(title: Text(l.newExpense)),
@@ -124,6 +146,29 @@ class _ExpensePageState extends ConsumerState<ExpensePage> {
                         ),
                     ]),
                     const SizedBox(height: 18),
+                    if (widget.employee == null && employees.isNotEmpty) ...[
+                      DropdownButtonFormField<String?>(
+                        initialValue: _employeeId,
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: l.expenseOnEmployee,
+                          prefixIcon:
+                              const Icon(Icons.badge_outlined, size: 20),
+                        ),
+                        items: [
+                          DropdownMenuItem(
+                              value: null, child: Text(l.noEmployee)),
+                          for (final e in employees)
+                            DropdownMenuItem(value: e.id, child: Text(e.name)),
+                        ],
+                        onChanged: (v) => setState(() => _employeeId = v),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+                    if (widget.employee != null) ...[
+                      Pill('${l.expenseOnEmployee}: ${widget.employee!.name}'),
+                      const SizedBox(height: 14),
+                    ],
                     DinarsField(
                       controller: _amount,
                       label: l.cashAmount,
@@ -148,7 +193,7 @@ class _ExpensePageState extends ConsumerState<ExpensePage> {
                         value: _date,
                         onChanged: (d) => setState(() => _date = d)),
                     const SizedBox(height: 10),
-                    Text(l.expenseHint,
+                    Text(_employeeId != null ? l.expenseEmployeeHint : l.expenseHint,
                         style: const TextStyle(
                             fontSize: 12, color: AppColors.textSecondary)),
                     const SizedBox(height: 20),

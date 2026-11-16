@@ -3,7 +3,7 @@ import 'package:gold_bashar/core/phone.dart';
 import 'package:gold_bashar/features/shell/tab_specs.dart';
 import 'package:gold_bashar/platform/platform_models.dart';
 
-Membership _m(OrgType type, MemberRole role, {Set<Perm>? perms, DateTime? endsAt}) => Membership(
+Membership _m(OrgType type, MemberRole role, {Set<Perm>? perms}) => Membership(
       membershipId: 'm',
       tenantId: 't',
       orgName: 'org',
@@ -11,7 +11,6 @@ Membership _m(OrgType type, MemberRole role, {Set<Perm>? perms, DateTime? endsAt
       status: OrgStatus.active,
       role: role,
       permissions: perms ?? Perm.defaultsFor(role),
-      subscriptionEndsAt: endsAt,
     );
 
 List<String> _tabs(Membership m) => [for (final t in tabsFor(m)) t.id];
@@ -57,27 +56,30 @@ void main() {
       expect(m.can(Perm.financeView), isFalse);
     });
 
-    test('الاشتراك المنتهي يجعل الحساب للقراءة فقط', () {
-      final expired = _m(OrgType.distributor, MemberRole.owner,
-          endsAt: DateTime.now().subtract(const Duration(days: 1)));
-      final soon = _m(OrgType.distributor, MemberRole.owner,
-          endsAt: DateTime.now().add(const Duration(days: 5)));
-      expect(expired.writable, isFalse);
-      expect(expired.isExpired, isTrue);
-      expect(soon.writable, isTrue);
-      expect(soon.isExpiringSoon, isTrue);
+    test('ترخيص دائم: المنشأة المفعّلة تكتب دائماً، والموقوفة لا', () {
+      expect(_m(OrgType.distributor, MemberRole.owner).writable, isTrue);
+      final suspended = Membership(
+        membershipId: 'm',
+        tenantId: 't',
+        orgName: 'org',
+        orgType: OrgType.distributor,
+        status: OrgStatus.suspended,
+        role: MemberRole.owner,
+        permissions: const {},
+      );
+      expect(suspended.writable, isFalse);
     });
   });
 
   group('تقسيم الواجهات — نسخة تاجر الشنطة', () {
-    test('المالك يرى الرئيسية والشنطة والمحلات والتجار والإعدادات', () {
+    test('المالك يرى الرئيسية والشنطة والمحلات والتجار والمصاريف والإعدادات', () {
       expect(_tabs(_m(OrgType.distributor, MemberRole.owner)),
-          ['home', 'bag', 'shops', 'traders', 'settings']);
+          ['home', 'bag', 'shops', 'traders', 'expenses', 'settings']);
     });
 
     test('المساعد يرى نفس التبويبات — الدفاتر المالية تُخفى داخل الإعدادات', () {
       expect(_tabs(_m(OrgType.distributor, MemberRole.assistant)),
-          ['home', 'bag', 'shops', 'traders', 'settings']);
+          ['home', 'bag', 'shops', 'traders', 'expenses', 'settings']);
     });
 
     test('الإعدادات آخر تبويب دائماً — منها الخروج', () {

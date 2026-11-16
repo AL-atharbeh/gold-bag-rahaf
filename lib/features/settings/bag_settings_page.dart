@@ -11,7 +11,6 @@ import '../../platform/session.dart';
 import '../cheques/cheques_page.dart';
 import '../common/inputs.dart';
 import '../common/ui.dart';
-import '../employees/employees_page.dart';
 import '../opening/opening_balances_page.dart';
 import '../reports/reports_page.dart';
 import '../team/member_editor.dart';
@@ -92,12 +91,6 @@ class BagSettingsPage extends ConsumerWidget {
                       icon: Icons.receipt_long_outlined,
                       title: l.tabCheques,
                       onTap: () => push(const ChequesPage()),
-                    ),
-                  if (m.can(Perm.financeView))
-                    _Tile(
-                      icon: Icons.badge_outlined,
-                      title: l.tabEmployees,
-                      onTap: () => push(const EmployeesPage()),
                     ),
 
                   // ── الحسابات ──
@@ -353,7 +346,7 @@ class _LetterheadCard extends ConsumerWidget {
   }
 }
 
-/// الحسابات المسموح لها بالدخول (3 كحد أقصى) — للعرض وتعديل الصلاحيات.
+/// الحساب المسموح له بالدخول (واحد في هذه النسخة) — للعرض وتعديل الصلاحيات.
 /// الإضافة وتغيير كلمة المرور من الدعم فقط.
 class _AccountsCard extends ConsumerWidget {
   const _AccountsCard();

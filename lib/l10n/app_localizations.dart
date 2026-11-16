@@ -1532,12 +1532,6 @@ abstract class AppLocalizations {
   /// **'الشنط وحاملوها'**
   String get bagsDesc;
 
-  /// No description provided for @subscription.
-  ///
-  /// In ar, this message translates to:
-  /// **'الاشتراك'**
-  String get subscription;
-
   /// No description provided for @adminDashboard.
   ///
   /// In ar, this message translates to:
@@ -1556,12 +1550,6 @@ abstract class AppLocalizations {
   /// **'مثلاً حساب مستقل إلى جانب عضويتك في مصنع'**
   String get registerAnotherOrgDesc;
 
-  /// No description provided for @planLabel.
-  ///
-  /// In ar, this message translates to:
-  /// **'الباقة'**
-  String get planLabel;
-
   /// No description provided for @endsOn.
   ///
   /// In ar, this message translates to:
@@ -1579,36 +1567,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'متبقٍّ {days} يوم'**
   String daysLeft(int days);
-
-  /// No description provided for @usersLimit.
-  ///
-  /// In ar, this message translates to:
-  /// **'المستخدمون'**
-  String get usersLimit;
-
-  /// No description provided for @bagsLimit.
-  ///
-  /// In ar, this message translates to:
-  /// **'الشنط'**
-  String get bagsLimit;
-
-  /// No description provided for @renewHint.
-  ///
-  /// In ar, this message translates to:
-  /// **'للتجديد أو تغيير الباقة تواصل مع إدارة التطبيق.'**
-  String get renewHint;
-
-  /// No description provided for @subscriptionExpiring.
-  ///
-  /// In ar, this message translates to:
-  /// **'ينتهي اشتراكك خلال {days} يوم'**
-  String subscriptionExpiring(int days);
-
-  /// No description provided for @subscriptionExpired.
-  ///
-  /// In ar, this message translates to:
-  /// **'انتهى الاشتراك — الحساب للقراءة فقط حتى التجديد'**
-  String get subscriptionExpired;
 
   /// No description provided for @seatsUsed.
   ///
@@ -1766,12 +1724,6 @@ abstract class AppLocalizations {
   /// **'المنشآت'**
   String get adminOrgs;
 
-  /// No description provided for @adminPlans.
-  ///
-  /// In ar, this message translates to:
-  /// **'الباقات'**
-  String get adminPlans;
-
   /// No description provided for @statPending.
   ///
   /// In ar, this message translates to:
@@ -1789,12 +1741,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تنتهي خلال 14 يوماً'**
   String get statExpiring;
-
-  /// No description provided for @statExpired.
-  ///
-  /// In ar, this message translates to:
-  /// **'اشتراك منتهٍ'**
-  String get statExpired;
 
   /// No description provided for @statSuspended.
   ///
@@ -1916,24 +1862,6 @@ abstract class AppLocalizations {
   /// **'سجل النشاط'**
   String get activityLog;
 
-  /// No description provided for @editPlan.
-  ///
-  /// In ar, this message translates to:
-  /// **'تعديل الباقة'**
-  String get editPlan;
-
-  /// No description provided for @newPlan.
-  ///
-  /// In ar, this message translates to:
-  /// **'باقة جديدة'**
-  String get newPlan;
-
-  /// No description provided for @planCode.
-  ///
-  /// In ar, this message translates to:
-  /// **'الرمز'**
-  String get planCode;
-
   /// No description provided for @nameAr.
   ///
   /// In ar, this message translates to:
@@ -1952,12 +1880,6 @@ abstract class AppLocalizations {
   /// **'السعر (د.أ)'**
   String get price;
 
-  /// No description provided for @periodMonths.
-  ///
-  /// In ar, this message translates to:
-  /// **'مدة الاشتراك (أشهر)'**
-  String get periodMonths;
-
   /// No description provided for @maxUsers.
   ///
   /// In ar, this message translates to:
@@ -1975,12 +1897,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'سعر الشنطة الإضافية (د.أ)'**
   String get extraBagPrice;
-
-  /// No description provided for @planActive.
-  ///
-  /// In ar, this message translates to:
-  /// **'الباقة متاحة'**
-  String get planActive;
 
   /// No description provided for @perPeriod.
   ///
@@ -2327,7 +2243,7 @@ abstract class AppLocalizations {
   /// No description provided for @editionVersion.
   ///
   /// In ar, this message translates to:
-  /// **'نسخة تاجر الشنطة · 1.2.0'**
+  /// **'نسخة تاجر الشنطة · 1.3.0'**
   String get editionVersion;
 
   /// No description provided for @support.
@@ -3101,13 +3017,13 @@ abstract class AppLocalizations {
   /// No description provided for @fixWithTrader.
   ///
   /// In ar, this message translates to:
-  /// **'تسكير مع تاجر (اختياري)'**
+  /// **'تسكير مع تاجر أو مشغل (اختياري)'**
   String get fixWithTrader;
 
   /// No description provided for @noTrader.
   ///
   /// In ar, this message translates to:
-  /// **'بدون تاجر'**
+  /// **'بدون تاجر أو مشغل'**
   String get noTrader;
 
   /// No description provided for @traderGrams.
@@ -3331,6 +3247,84 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مسترد {n}'**
   String recoveredLine(int n);
+
+  /// No description provided for @tabExpenses.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصاريف'**
+  String get tabExpenses;
+
+  /// No description provided for @expensesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصاريف'**
+  String get expensesTitle;
+
+  /// No description provided for @noExpenses.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا مصاريف في هذه الفترة'**
+  String get noExpenses;
+
+  /// No description provided for @expensesTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'مجموع المصاريف'**
+  String get expensesTotal;
+
+  /// No description provided for @expensesOnEmployees.
+  ///
+  /// In ar, this message translates to:
+  /// **'منها باسم الموظفين'**
+  String get expensesOnEmployees;
+
+  /// No description provided for @expenseOnEmployee.
+  ///
+  /// In ar, this message translates to:
+  /// **'على حساب موظف (اختياري)'**
+  String get expenseOnEmployee;
+
+  /// No description provided for @noEmployee.
+  ///
+  /// In ar, this message translates to:
+  /// **'بدون موظف'**
+  String get noEmployee;
+
+  /// No description provided for @expenseEmployeeHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'يخرج من كاش الشنطة ويُخصم من راتب الموظف، ويظهر في مصاريف اليوم.'**
+  String get expenseEmployeeHint;
+
+  /// No description provided for @fixInSale.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسكير مع البيع (اختياري)'**
+  String get fixInSale;
+
+  /// No description provided for @fixInSaleHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسكير غرامات المحل في نفس الفاتورة، ومعه تاجر أو مشغل إن أردت.'**
+  String get fixInSaleHint;
+
+  /// No description provided for @fixGrams.
+  ///
+  /// In ar, this message translates to:
+  /// **'غرامات التسكير (صافي)'**
+  String get fixGrams;
+
+  /// No description provided for @fixNeedsGramsPrice.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل غرامات التسكير وسعره، أو أطفئ التسكير.'**
+  String get fixNeedsGramsPrice;
+
+  /// No description provided for @fixSpread.
+  ///
+  /// In ar, this message translates to:
+  /// **'فرق السعر'**
+  String get fixSpread;
 }
 
 class _AppLocalizationsDelegate

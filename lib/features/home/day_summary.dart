@@ -56,9 +56,9 @@ class DaySummary {
         } else {
           cashOut -= p.amount;
           // سحب الموظف يخرج من الكاش ويُعرض مع المصاريف
-          if (p.lineNote == noteEmployeeDraw) {
+          if (p.lineNote == noteEmployeeDraw || p.lineNote == noteSalaryPay) {
             expenses -= p.amount;
-            expenseList.add((null, p.txNote ?? noteEmployeeDraw, -p.amount));
+            expenseList.add((null, p.txNote ?? p.lineNote, -p.amount));
           }
         }
       } else if (p.accountId == expensesId && p.ledger == LedgerKind.cash) {

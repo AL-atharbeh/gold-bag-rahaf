@@ -7,17 +7,17 @@
 class AppConfig {
   static const supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://ykopzrugkbrxbsyvizfb.supabase.co',
+    defaultValue: 'https://wnbwxxvicbfswwkcrznq.supabase.co',
   );
 
   static const supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: 'sb_publishable_34zhaEWMXjWLg6T5O_GpKw_u9KTev61',
+    defaultValue: 'sb_publishable_yMDPy1oYysYqVNp-IaMUFA_81IYTmCF',
   );
 
   /// رقم الدعم الذي يظهر في شاشة انتظار التفعيل والاشتراك. فارغ = لا يظهر.
   static const supportPhone = String.fromEnvironment('SUPPORT_PHONE');
 
   /// أقصى عدد حسابات في نسخة الشنطة — مفروض أيضاً في قاعدة البيانات.
-  static const bagEditionMaxUsers = 3;
+  static const bagEditionMaxUsers = 1;
 }

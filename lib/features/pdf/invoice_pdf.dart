@@ -31,11 +31,16 @@ Future<Uint8List> buildInvoicePdf({
       gold.where((x) => x.itemName != null && x.amount > 0).toList();
   final goodsIn =
       gold.where((x) => x.itemName != null && x.amount < 0).toList();
-  final scrapIn =
-      gold.where((x) => x.itemName == null && x.amount < 0).toList();
-  final scrapOut =
-      gold.where((x) => x.itemName == null && x.amount > 0).toList();
   bool isFix(TxLine x) => x.note == noteFixGold || x.note == noteFixScrap;
+  // غرامات التسكير ليست كسراً مستلماً أو مسلَّماً
+  final scrapIn = gold
+      .where((x) => x.itemName == null && x.amount < 0 && !isFix(x))
+      .toList();
+  final scrapOut = gold
+      .where((x) => x.itemName == null && x.amount > 0 && !isFix(x))
+      .toList();
+  final fixGoldMg =
+      gold.where(isFix).fold<int>(0, (a, x) => a + x.amount.abs());
   bool special(TxLine x) =>
       x.makingPerGramFils != null ||
       x.note == noteMakingDiscount ||
@@ -236,9 +241,13 @@ Future<Uint8List> buildInvoicePdf({
           cashTable(ar ? 'أجور البدل' : 'Exchange fee', exchangeFee),
         if (fixValue.isNotEmpty)
           cashTable(
-              fixValue.first.note == noteFixScrap
-                  ? (ar ? 'تسكير كسر' : 'Fix — scrap')
-                  : (ar ? 'تسكير حلة' : 'Fix — gold'),
+              [
+                fixValue.first.note == noteFixScrap
+                    ? (ar ? 'تسكير كسر' : 'Fix — scrap')
+                    : (ar ? 'تسكير حلة' : 'Fix — gold'),
+                if (fixGoldMg > 0)
+                  '${formatGrams(fixGoldMg)} ${ar ? 'غ' : 'g'}',
+              ].join(' — '),
               fixValue),
         if (cashOut.isNotEmpty)
           cashTable(ar ? 'نقد مدفوع' : 'Cash paid', cashOut),

@@ -5,7 +5,6 @@ import '../../app/providers.dart';
 import '../../app/theme.dart';
 import '../../core/locale.dart';
 import '../../core/units.dart';
-import '../../data/gold_repository.dart';
 import '../../domain/enums.dart';
 import '../../domain/ledger.dart';
 import '../../domain/models.dart';
@@ -56,6 +55,15 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
   final List<GoodsLineState> _scrap = [];
   final _discount = TextEditingController();
   _Discount _discountMode = _Discount.none;
+
+  // التسكير مع البيع: غرامات وسعر، وتاجر أو مشغل اختياري بغراماته وسعره
+  bool _fixOn = false;
+  final _fixGrams = TextEditingController();
+  final _fixPrice = TextEditingController();
+  final _traderGrams = TextEditingController();
+  final _traderPrice = TextEditingController();
+  String? _fixTraderId;
+  String _fixClass = noteFixGold;
   late String? _shopId = widget.shopId;
   DateTime _date = DateTime.now();
   bool _busy = false;
@@ -65,6 +73,9 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
     _note.dispose();
     _cash.dispose();
     _discount.dispose();
+    for (final c in [_fixGrams, _fixPrice, _traderGrams, _traderPrice]) {
+      c.dispose();
+    }
     for (final l in [..._goods, ..._recovered, ..._scrap]) {
       l.dispose();
     }
@@ -101,21 +112,53 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
             extraFils: parseDinars(_discount.text) ?? 0),
       };
 
-  /// يعبّئ آخر مصنوعية بيع بها هذا الصنف لهذا المحل، ويبقى قابلاً للتعديل.
-  void _applyRemembered(AppLocalizations l, Map<String, LastMaking> known) {
+  /// يعبّئ آخر مصنوعية بيع بها هذا الصنف لهذا المحل، ويبقى قابلاً للتعديل،
+  /// ويعرض آخر 3 للاختيار منها.
+  void _applyRemembered(AppLocalizations l) {
+    final shop = _shopId;
     for (final line in _goods) {
-      if (line.itemId == null) continue;
-      final key = '${line.itemId}|${line.karatId}';
+      final item = line.itemId, karat = line.karatId;
+      if (shop == null || item == null || karat == null) {
+        line.recent = const [];
+        continue;
+      }
+      final recent = ref
+          .watch(recentMakingsProvider(
+              (partyId: shop, itemId: item, karatId: karat)))
+          .valueOrNull;
+      // لم تصل بعد: يُعبّأ حين تصل
+      if (recent == null) continue;
+      line.recent = recent;
+      final key = '$shop|$item|$karat';
       if (line.makingKey == key) continue;
       line.makingKey = key;
-      final m = known[key];
       line.makingHint = null;
+      final m = recent.firstOrNull;
       if (m == null) continue;
       line.making.text = formatDinars(m.rateFils);
       line.perPiece = m.perPiece;
       line.makingHint = l.lastMakingHint(
           formatDinars(m.rateFils), m.perPiece ? l.perPiece : l.perGram);
     }
+  }
+
+  /// التسكير المُدخل، أو null إن لم يُفعَّل أو لم يكتمل.
+  /// [goldAfterSale] رصيد ذهب المحل بعد البيع: موجب = الذهب عليه.
+  SaleFix? _saleFix(int goldAfterSale) {
+    if (!_fixOn) return null;
+    final grams = parseGrams(_fixGrams.text) ?? 0;
+    final price = parseDinars(_fixPrice.text) ?? 0;
+    if (grams <= 0 || price <= 0) return null;
+    return SaleFix(
+      netMg: grams,
+      priceFils: price,
+      owedToUs: goldAfterSale >= 0,
+      traderId: _fixTraderId,
+      // فارغة = نفس غرامات المحل وسعره
+      traderNetMg: parseGrams(_traderGrams.text) ?? grams,
+      traderPriceFils: parseDinars(_traderPrice.text) ?? price,
+      classNote: _fixClass,
+    );
   }
 
   void _addScrap() {
@@ -206,7 +249,25 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
       showResult(context, l.invalidAmount, error: true);
       return;
     }
-    if (goods.isEmpty && scrap.isEmpty && recovered.isEmpty && cash == 0) {
+    final shopGold = (ref.read(balancesProvider).valueOrNull ??
+                const <AccountBalance>[])
+            .where((b) => b.accountId == _shopId)
+            .firstOrNull
+            ?.goldMg ??
+        0;
+    final saleFix = _saleFix(shopGold +
+        goods.fold<int>(0, (a, g) => a + g.netMg) -
+        recovered.fold<int>(0, (a, g) => a + g.netMg) -
+        scrap.fold<int>(0, (a, g) => a + g.netMg));
+    if (_fixOn && saleFix == null) {
+      showResult(context, l.fixNeedsGramsPrice, error: true);
+      return;
+    }
+    if (goods.isEmpty &&
+        scrap.isEmpty &&
+        recovered.isEmpty &&
+        cash == 0 &&
+        saleFix == null) {
       showResult(context, l.emptyTx, error: true);
       return;
     }
@@ -263,6 +324,8 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
             costOutFils: capitalCost(goodsNet, bagBalance),
             costBackFils: capitalCost(recoveredNet, bagBalance),
             makingDiscountFils: _discountFils(makingTotal),
+            saleFix: saleFix,
+            tradingIncomeId: sys[SystemAccount.tradingIncome],
             occurredAt: _date,
             note: _note.text.trim().isEmpty ? null : _note.text.trim(),
           );
@@ -360,10 +423,7 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
       }
       ensureKarats([line], karatsFor(line));
     }
-    final known = _shopId == null
-        ? null
-        : ref.watch(lastMakingsProvider(_shopId!)).valueOrNull;
-    if (known != null) _applyRemembered(l, known);
+    _applyRemembered(l);
     final goods = _collect(_goods, goodsKarats) ?? const <GoodsLine>[];
     final recovered = _collect(_recovered, goodsKarats) ?? const <GoodsLine>[];
     final scrap = _collect(_scrap, scrapKarats) ?? const <GoodsLine>[];
@@ -379,10 +439,50 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
 
     final goldBefore = shopBalance?.goldMg ?? 0;
     final cashBefore = shopBalance?.cashFils ?? 0;
-    final goldAfter = goldBefore + goodsNet - recoveredNet - scrapNet;
-    final cashAfter = cashBefore + making - discount - cash;
-    final touched =
-        goodsNet != 0 || recoveredNet != 0 || scrapNet != 0 || cash != 0;
+    final goldAfterSale = goldBefore + goodsNet - recoveredNet - scrapNet;
+    final fix = _saleFix(goldAfterSale);
+    final fixSign = (fix?.owedToUs ?? true) ? 1 : -1;
+    final fixValue = fix == null ? 0 : weightValue(fix.netMg, fix.priceFils);
+    final goldAfter = goldAfterSale - fixSign * (fix?.netMg ?? 0);
+    final cashAfter =
+        cashBefore + making - discount - cash + fixSign * fixValue;
+    final touched = goodsNet != 0 ||
+        recoveredNet != 0 ||
+        scrapNet != 0 ||
+        cash != 0 ||
+        fix != null;
+    final traders =
+        ref.watch(suppliersProvider).valueOrNull ?? const <Account>[];
+
+    Widget gramsField(TextEditingController c, String label, {String? hint}) =>
+        AdaptiveBox(
+          width: 220,
+          half: true,
+          child: TextFormField(
+            controller: c,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: decimalInputFormatters,
+            textDirection: TextDirection.ltr,
+            decoration: InputDecoration(
+                labelText: label, hintText: hint, suffixText: l.gramsUnit),
+            onChanged: (_) => setState(() {}),
+          ),
+        );
+    Widget priceField(TextEditingController c, {String? hint}) => AdaptiveBox(
+          width: 220,
+          half: true,
+          child: TextFormField(
+            controller: c,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: decimalInputFormatters,
+            textDirection: TextDirection.ltr,
+            decoration: InputDecoration(
+                labelText: l.pricePerGram24,
+                hintText: hint,
+                suffixText: l.dinarUnit),
+            onChanged: (_) => setState(() {}),
+          ),
+        );
 
     // ما يتجاوز الموجود في الشنطة — يظهر هنا ويمنع الحفظ
     final warnings = stock == null
@@ -659,6 +759,80 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
                       onChanged: (_) => setState(() {}),
                     ),
                   ),
+                  // ٥) التسكير مع البيع — اختياري، ومعه تاجر أو مشغل
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    value: _fixOn,
+                    onChanged: (v) => setState(() => _fixOn = v),
+                    contentPadding: EdgeInsets.zero,
+                    activeThumbColor: AppColors.goldDark,
+                    secondary: const Icon(Icons.lock_clock_outlined,
+                        color: AppColors.goldDark),
+                    title: Text(l.fixInSale,
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: Text(l.fixInSaleHint,
+                        style: const TextStyle(fontSize: 12)),
+                  ),
+                  if (_fixOn) ...[
+                    const SizedBox(height: 8),
+                    Wrap(spacing: 12, runSpacing: 12, children: [
+                      gramsField(_fixGrams, l.fixGrams),
+                      priceField(_fixPrice),
+                    ]),
+                    const SizedBox(height: 12),
+                    SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(
+                            value: noteFixGold, label: Text(l.fixClassGold)),
+                        ButtonSegment(
+                            value: noteFixScrap, label: Text(l.fixClassScrap)),
+                      ],
+                      selected: {_fixClass},
+                      showSelectedIcon: false,
+                      onSelectionChanged: (v) =>
+                          setState(() => _fixClass = v.first),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String?>(
+                      initialValue: _fixTraderId,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: l.fixWithTrader,
+                        prefixIcon:
+                            const Icon(Icons.handshake_outlined, size: 20),
+                      ),
+                      items: [
+                        DropdownMenuItem(value: null, child: Text(l.noTrader)),
+                        for (final t in traders)
+                          DropdownMenuItem(value: t.id, child: Text(t.name)),
+                      ],
+                      onChanged: (v) => setState(() => _fixTraderId = v),
+                    ),
+                    if (_fixTraderId != null) ...[
+                      const SizedBox(height: 12),
+                      Wrap(spacing: 12, runSpacing: 12, children: [
+                        gramsField(_traderGrams, l.traderGrams,
+                            hint: _fixGrams.text),
+                        priceField(_traderPrice, hint: _fixPrice.text),
+                      ]),
+                      const SizedBox(height: 4),
+                      Text(l.traderFixHint,
+                          style: const TextStyle(
+                              fontSize: 12, color: AppColors.textSecondary)),
+                    ],
+                    if (fix != null) ...[
+                      const SizedBox(height: 10),
+                      Pill(
+                          '${l.opFix}: ${formatGrams(fix.netMg)} ${l.gramsUnit} × ${formatDinars(fix.priceFils)} = ${formatDinars(fixValue)} ${l.dinarUnit}'),
+                      if (fix.traderId != null &&
+                          (fix.traderNetMg != fix.netMg ||
+                              fix.traderPriceFils != fix.priceFils)) ...[
+                        const SizedBox(height: 6),
+                        Pill(
+                            '${l.fixSpread}: ${formatDinars(fixValue - weightValue(fix.traderNetMg, fix.traderPriceFils))} ${l.dinarUnit}'),
+                      ],
+                    ],
+                  ],
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _note,
@@ -696,6 +870,11 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
                         (
                           l.receivedCash,
                           '${formatDinars(cash)} ${l.dinarUnit}'
+                        ),
+                      if (fix != null)
+                        (
+                          l.opFix,
+                          '${formatGrams(fix.netMg)} ${l.gramsUnit} = ${formatDinars(fixValue)} ${l.dinarUnit}'
                         ),
                     ]),
                     const SizedBox(height: 12),

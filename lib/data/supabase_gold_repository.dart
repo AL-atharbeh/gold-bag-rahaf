@@ -167,7 +167,7 @@ class SupabaseGoldRepository implements GoldRepository {
       var q = _client.from('postings').select(
           'tx_id, account_id, ledger, amount, gross_weight_mg, quantity, item_id, karat_id, making_per_gram_fils, note, '
           'items(name), karats(name), '
-          'transactions!inner(type, doc_number, occurred_at, reversed_by_tx_id, counterparty_id, accounts(name, kind))');
+          'transactions!inner(type, doc_number, occurred_at, reversed_by_tx_id, counterparty_id, note, accounts(name, kind))');
       if (accountId != null) q = q.eq('account_id', accountId);
       q = q.gte('transactions.occurred_at', from.toUtc().toIso8601String());
       if (to != null) {
@@ -325,15 +325,19 @@ class SupabaseGoldRepository implements GoldRepository {
     int costOutFils = 0,
     int costBackFils = 0,
     int makingDiscountFils = 0,
+    SaleFix? saleFix,
+    String? tradingIncomeId,
     DateTime? occurredAt,
     String? note,
   }) =>
       _post(
-        // نوع الحركة يتبع أهم ما فيها: بيع، أو دفعة كسر، أو دفعة نقد
+        // نوع الحركة يتبع أهم ما فيها: بيع، أو دفعة كسر، أو تسكير، أو نقد
         goods.isNotEmpty || recovered.isNotEmpty
             ? TxType.sale
             : scrap.isNotEmpty
                 ? TxType.goldPayment
+                : saleFix != null
+                    ? TxType.pricing
                 : TxType.cashPayment,
         shopId,
         occurredAt,
@@ -350,41 +354,40 @@ class SupabaseGoldRepository implements GoldRepository {
           costOutFils: costOutFils,
           costBackFils: costBackFils,
           makingDiscountFils: makingDiscountFils,
+          saleFix: saleFix,
+          tradingIncomeId: tradingIncomeId,
         ),
+        pricePerGramFils: saleFix?.priceFils,
       );
 
   @override
-  Future<Map<String, LastMaking>> lastMakings(String partyId) async {
-    const page = 1000;
-    final rows = <Map<String, dynamic>>[];
-    for (var start = 0;; start += page) {
-      final chunk = await _client
-          .from('postings')
-          .select('item_id, karat_id, amount, making_per_gram_fils, note, '
-              'transactions!inner(occurred_at, reversed_by_tx_id)')
-          .eq('account_id', partyId)
-          .eq('ledger', LedgerKind.cash.wire)
-          .not('item_id', 'is', null)
-          .not('making_per_gram_fils', 'is', null)
-          .isFilter('transactions.reversed_by_tx_id', null)
-          .order('tx_id')
-          .order('seq')
-          .range(start, start + page - 1);
-      rows.addAll(chunk);
-      if (chunk.length < page) break;
-    }
-    String at(Map<String, dynamic> r) =>
-        (r['transactions'] as Map)['occurred_at'] as String;
-    final sale = rows.where((r) => (r['amount'] as num) > 0).toList()
-      ..sort((a, b) =>
-          DateTime.parse(at(a)).compareTo(DateTime.parse(at(b))));
-    return {
-      for (final r in sale)
-        '${r['item_id']}|${r['karat_id']}': LastMaking(
+  Future<List<LastMaking>> recentMakings(
+      String partyId, String itemId, String karatId,
+      {int limit = 3}) async {
+    // سطور مصنوعية البيع وحدها (موجبة على المحل)، من الحركات غير الملغاة
+    final rows = await _client
+        .from('postings')
+        .select('amount, making_per_gram_fils, note, created_at, '
+            'transactions!inner(occurred_at, reversed_by_tx_id)')
+        .eq('account_id', partyId)
+        .eq('ledger', LedgerKind.cash.wire)
+        .eq('item_id', itemId)
+        .eq('karat_id', karatId)
+        .gt('amount', 0)
+        .not('making_per_gram_fils', 'is', null)
+        .isFilter('transactions.reversed_by_tx_id', null)
+        .order('created_at', ascending: false)
+        .limit(limit);
+    return [
+      for (final r in rows)
+        LastMaking(
           (r['making_per_gram_fils'] as num).toInt(),
           r['note'] == noteMakingPiece,
+          DateTime.tryParse(
+                  (r['transactions'] as Map)['occurred_at'] as String? ?? '')
+              ?.toLocal(),
         ),
-    };
+    ];
   }
 
   @override
@@ -457,27 +460,34 @@ class SupabaseGoldRepository implements GoldRepository {
     required String employeeId,
     required String cashboxId,
     required int amountFils,
+    String? label,
+    bool salaryPay = false,
     DateTime? occurredAt,
     String? note,
-  }) =>
-      _post(
-        TxType.cashPayment,
-        employeeId,
-        occurredAt,
-        note,
-        [
-          PostingDraft.cash(
-              accountId: cashboxId,
-              amountFils: amountFils,
-              debit: false,
-              note: noteEmployeeDraw),
-          PostingDraft.cash(
-              accountId: employeeId,
-              amountFils: amountFils,
-              debit: true,
-              note: noteEmployeeDraw),
-        ],
-      );
+  }) {
+    if (amountFils <= 0) throw ArgumentError('المبلغ يجب أن يكون أكبر من صفر');
+    final n = note?.trim();
+    final kind = salaryPay ? noteSalaryPay : noteEmployeeDraw;
+    // البند والتفاصيل في ملاحظة الحركة، فتظهر في كشف الموظف ومصاريف اليوم
+    final txNote = [
+      if (salaryPay) noteSalaryPay,
+      if (label != null) label,
+      if (n != null && n.isNotEmpty) n,
+    ].join(' — ');
+    return _post(
+      TxType.cashPayment,
+      employeeId,
+      occurredAt,
+      txNote.isEmpty ? null : txNote,
+      [
+        PostingDraft.cash(
+            accountId: cashboxId, amountFils: amountFils, debit: false, note: kind),
+        // بلا ملاحظة على سطر الموظف: كشفه يعرض ملاحظة الحركة بتفاصيلها
+        PostingDraft.cash(
+            accountId: employeeId, amountFils: amountFils, debit: true),
+      ],
+    );
+  }
 
   @override
   Future<String> openingParty({
@@ -756,6 +766,7 @@ class SupabaseGoldRepository implements GoldRepository {
     String? phone,
     String? note,
     int monthlySalaryFils = 0,
+    DateTime? salaryStartDate,
   }) =>
       _insertAccount({
         'name': name,
@@ -763,6 +774,8 @@ class SupabaseGoldRepository implements GoldRepository {
         'phone': phone,
         'note': note,
         'monthly_salary_fils': monthlySalaryFils,
+        if (salaryStartDate != null)
+          'salary_start_date': _day(salaryStartDate),
       });
 
   @override
@@ -772,12 +785,18 @@ class SupabaseGoldRepository implements GoldRepository {
     String? phone,
     String? note,
     int? monthlySalaryFils,
+    DateTime? salaryStartDate,
+    bool clearSalaryStart = false,
   }) async {
     final patch = <String, dynamic>{
       if (name != null) 'name': name,
       if (phone != null) 'phone': phone,
       if (note != null) 'note': note,
       if (monthlySalaryFils != null) 'monthly_salary_fils': monthlySalaryFils,
+      if (salaryStartDate != null)
+        'salary_start_date': _day(salaryStartDate)
+      else if (clearSalaryStart)
+        'salary_start_date': null,
     };
     if (patch.isEmpty) return;
     _ensureOnline();

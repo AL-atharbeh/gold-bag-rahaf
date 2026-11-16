@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../platform/platform_models.dart';
 import '../accounts/accounts_page.dart';
 import '../bag/bag_page.dart';
+import '../expenses/expenses_tab.dart';
 import '../home/home_page.dart';
 import '../settings/bag_settings_page.dart';
 
@@ -28,8 +29,8 @@ class ShellTab {
 
 /// تبويبات نسخة تاجر الشنطة:
 ///
-///   الرئيسية ← الشنطة (المخزون والمشاغل) ← المحلات ← التجار ← الإعدادات
-///   التقارير والذمم والشيكات والموظفون داخل الإعدادات.
+///   الرئيسية ← الشنطة ← المحلات ← التجار ← المصاريف والموظفون ← الإعدادات
+///   التقارير والشيكات والأرصدة الافتتاحية داخل الإعدادات.
 ///
 /// السيرفر يفرض الصلاحيات نفسها في RLS — إخفاء أي شيء هنا للوضوح لا للحماية.
 List<ShellTab> tabsFor(Membership m) => [
@@ -73,6 +74,13 @@ List<ShellTab> tabsFor(Membership m) => [
           emptyTitle: l.noTraders,
           emptyHint: l.noTradersHint,
         ),
+      ),
+      ShellTab(
+        id: 'expenses',
+        icon: Icons.receipt_long_outlined,
+        selectedIcon: Icons.receipt_long_rounded,
+        label: (l) => l.tabExpenses,
+        page: (_) => const ExpensesTab(),
       ),
       ShellTab(
         id: 'settings',

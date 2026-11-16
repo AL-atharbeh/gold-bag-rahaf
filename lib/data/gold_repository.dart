@@ -23,6 +23,7 @@ abstract class GoldRepository {
     String? phone,
     String? note,
     int monthlySalaryFils = 0,
+    DateTime? salaryStartDate,
   }) =>
       throw UnimplementedError('createEmployee غير مدعوم في هذا المستودع');
 
@@ -32,6 +33,8 @@ abstract class GoldRepository {
     String? phone,
     String? note,
     int? monthlySalaryFils,
+    DateTime? salaryStartDate,
+    bool clearSalaryStart = false,
   }) =>
       throw UnimplementedError('updateEmployee غير مدعوم في هذا المستودع');
 
@@ -111,14 +114,18 @@ abstract class GoldRepository {
     int costOutFils = 0,
     int costBackFils = 0,
     int makingDiscountFils = 0,
+    SaleFix? saleFix,
+    String? tradingIncomeId,
     DateTime? occurredAt,
     String? note,
   }) =>
       throw UnimplementedError('shopSale غير مدعوم في هذا المستودع');
 
-  /// آخر مصنوعية بيع لكل صنف وعيار عند هذا الطرف.
-  Future<Map<String, LastMaking>> lastMakings(String partyId) =>
-      throw UnimplementedError('lastMakings غير مدعوم في هذا المستودع');
+  /// آخر [limit] مصنوعيات بيع بها هذا الصنف بهذا العيار لهذا الطرف،
+  /// الأحدث أولاً.
+  Future<List<LastMaking>> recentMakings(
+          String partyId, String itemId, String karatId, {int limit = 3}) =>
+      throw UnimplementedError('recentMakings غير مدعوم في هذا المستودع');
 
   /// تسكير مع دفعة نقدية اختيارية وتسكير مقابل مع تاجر.
   Future<String> fix({
@@ -152,11 +159,15 @@ abstract class GoldRepository {
   }) =>
       throw UnimplementedError('exchange غير مدعوم في هذا المستودع');
 
-  /// سحب موظف من كاش الشنطة: يُخصم من راتبه ويُحسب ضمن مصاريف اليوم.
+  /// سحب موظف أو مصروف باسمه من كاش الشنطة: يُخصم من راتبه ويُحسب ضمن
+  /// مصاريف اليوم. [label] بند المصروف إن كان مصروفاً (بنزين، أكل…).
+  /// [salaryPay] صحيح = صرف باقي الراتب.
   Future<String> employeeDraw({
     required String employeeId,
     required String cashboxId,
     required int amountFils,
+    String? label,
+    bool salaryPay = false,
     DateTime? occurredAt,
     String? note,
   }) =>
@@ -297,12 +308,13 @@ abstract class GoldRepository {
   Future<String> reverse(String txId, {String? reason});
 }
 
-/// آخر مصنوعية بيعت بها قطعة لطرف: السعر، وهل هو للقطعة.
+/// مصنوعية بيعت بها قطعة لطرف: السعر، وهل هو للقطعة، ومتى.
 class LastMaking {
-  const LastMaking(this.rateFils, this.perPiece);
+  const LastMaking(this.rateFils, this.perPiece, [this.at]);
 
   final int rateFils;
   final bool perPiece;
+  final DateTime? at;
 }
 
 /// بيانات شيك مرافق لدفعة نقدية.

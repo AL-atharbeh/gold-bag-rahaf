@@ -295,6 +295,7 @@ class Account {
     this.systemKey,
     this.isSystem = false,
     this.monthlySalaryFils = 0,
+    this.salaryStartDate,
   });
 
   factory Account.fromJson(Map<String, dynamic> j) => Account(
@@ -307,6 +308,9 @@ class Account {
         systemKey: j['system_key'] as String?,
         isSystem: j['is_system'] as bool? ?? false,
         monthlySalaryFils: (j['monthly_salary_fils'] as num?)?.toInt() ?? 0,
+        salaryStartDate: j['salary_start_date'] == null
+            ? null
+            : DateTime.tryParse(j['salary_start_date'] as String),
       );
 
   final String id;
@@ -322,6 +326,10 @@ class Account {
 
   /// الراتب الشهري — للموظفين وحدهم، صفر لبقية الأنواع.
   final MoneyFils monthlySalaryFils;
+
+  /// بداية راتب الموظف: منها تبدأ دورته الشهرية ويُرحَّل الباقي.
+  /// فارغ = الشهر الميلادي بلا ترحيل.
+  final DateTime? salaryStartDate;
 }
 
 class AccountBalance {
@@ -505,6 +513,7 @@ class PeriodPosting {
     this.karatName,
     this.makingPerGramFils,
     this.lineNote,
+    this.txNote,
   });
 
   factory PeriodPosting.fromJson(Map<String, dynamic> j) {
@@ -532,10 +541,14 @@ class PeriodPosting {
       karatName: (j['karats'] as Map?)?['name'] as String?,
       makingPerGramFils: (j['making_per_gram_fils'] as num?)?.toInt(),
       lineNote: j['note'] as String?,
+      txNote: t['note'] as String?,
     );
   }
 
   final String? lineNote;
+
+  /// ملاحظة الحركة كلها (بند المصروف وتفاصيله مثلاً).
+  final String? txNote;
   final String txId;
   final TxType txType;
   final String docNumber;

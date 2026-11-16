@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../app/theme.dart';
+import '../../core/dates.dart';
 import '../../core/units.dart';
 import '../../domain/models.dart';
 import '../common/inputs.dart';
@@ -26,6 +27,9 @@ class _NewEmployeeDialogState extends ConsumerState<NewEmployeeDialog> {
   late final TextEditingController _phone;
   late final TextEditingController _salary;
   late final TextEditingController _note;
+
+  /// بداية الراتب: منها تبدأ الدورة ويُرحَّل الباقي. فارغ = الشهر الميلادي.
+  DateTime? _start;
   bool _busy = false;
 
   bool get _isEdit => widget.employee != null;
@@ -42,6 +46,17 @@ class _NewEmployeeDialogState extends ConsumerState<NewEmployeeDialog> {
           : formatDinars(e.monthlySalaryFils),
     );
     _note = TextEditingController(text: e?.note ?? '');
+    _start = e?.salaryStartDate;
+  }
+
+  Future<void> _pickStart() async {
+    final d = await showDatePicker(
+      context: context,
+      initialDate: _start ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (d != null) setState(() => _start = d);
   }
 
   @override
@@ -74,6 +89,8 @@ class _NewEmployeeDialogState extends ConsumerState<NewEmployeeDialog> {
           phone: phone,
           note: note,
           monthlySalaryFils: salary,
+          salaryStartDate: _start,
+          clearSalaryStart: _start == null,
         );
       } else {
         await repo.createEmployee(
@@ -81,6 +98,7 @@ class _NewEmployeeDialogState extends ConsumerState<NewEmployeeDialog> {
           phone: phone.isEmpty ? null : phone,
           note: note.isEmpty ? null : note,
           monthlySalaryFils: salary,
+          salaryStartDate: _start,
         );
       }
 
@@ -155,7 +173,7 @@ class _NewEmployeeDialogState extends ConsumerState<NewEmployeeDialog> {
                             ),
                             const SizedBox(height: 2),
                             const Text(
-                              'راتب شهري ثابت، والسحوبات تُخصم منه شهراً بشهر',
+                              'راتب شهري ثابت، والسحوبات والمصاريف باسمه تُخصم منه',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
@@ -186,6 +204,33 @@ class _NewEmployeeDialogState extends ConsumerState<NewEmployeeDialog> {
                     label: 'الراتب الشهري',
                     allowZero: true,
                     required: false,
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: _pickStart,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'تاريخ بداية الراتب (اختياري)',
+                        prefixIcon: const Icon(Icons.event_outlined),
+                        suffixIcon: _start == null
+                            ? null
+                            : IconButton(
+                                tooltip: 'بلا تاريخ',
+                                icon: const Icon(Icons.close_rounded),
+                                onPressed: () => setState(() => _start = null),
+                              ),
+                      ),
+                      child: Text(
+                        _start == null
+                            ? 'الشهر من أوله لآخره'
+                            : '${shortDate(_start!)} — الدورة من يوم ${_start!.day} لمثله، والباقي يُرحَّل',
+                        style: TextStyle(
+                            color: _start == null
+                                ? AppColors.textMuted
+                                : AppColors.textPrimary),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(

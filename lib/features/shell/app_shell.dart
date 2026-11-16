@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
 import '../../core/locale.dart';
-import '../../platform/platform_models.dart';
 import '../../platform/session.dart';
 import 'tab_specs.dart';
 
@@ -30,21 +29,9 @@ class _AppShellState extends ConsumerState<AppShell> {
         tabs.indexWhere((t) => t.id == _selectedId).clamp(0, tabs.length - 1);
     void select(int i) => setState(() => _selectedId = tabs[i].id);
 
-    final body = Column(
-      children: [
-        _SubscriptionBanner(membership: m),
-        Expanded(
-          // الشريط أخذ مساحة شريط الحالة، فلا تضيفها الصفحات مرة ثانية
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: m.isExpired || m.isExpiringSoon,
-            child: IndexedStack(
-              index: index,
-              children: [for (final t in tabs) t.page(l)],
-            ),
-          ),
-        ),
-      ],
+    final body = IndexedStack(
+      index: index,
+      children: [for (final t in tabs) t.page(l)],
     );
 
     final wide = MediaQuery.sizeOf(context).width >= 700;
@@ -116,53 +103,6 @@ class _AppShellState extends ConsumerState<AppShell> {
           ),
           Expanded(child: body),
         ],
-      ),
-    );
-  }
-}
-
-/// تنبيه قرب انتهاء الاشتراك، أو أن الحساب صار للقراءة فقط.
-class _SubscriptionBanner extends StatelessWidget {
-  const _SubscriptionBanner({required this.membership});
-
-  final Membership membership;
-
-  @override
-  Widget build(BuildContext context) {
-    final m = membership;
-    final l = context.l10n;
-    if (!m.isExpired && !m.isExpiringSoon) return const SizedBox.shrink();
-
-    final expired = m.isExpired;
-    return Material(
-      color: expired ? AppColors.errorContainer : AppColors.goldContainer,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            children: [
-              Icon(
-                expired ? Icons.lock_clock_rounded : Icons.schedule_rounded,
-                size: 18,
-                color: expired ? AppColors.error : AppColors.goldDark,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  expired
-                      ? l.subscriptionExpired
-                      : l.subscriptionExpiring(m.daysLeft ?? 0),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: expired ? AppColors.error : AppColors.goldDark,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -78,12 +78,17 @@ class TransactionDetailPage extends ConsumerWidget {
               gold.where((x) => x.itemName != null && x.amount > 0).toList();
           final goodsIn =
               gold.where((x) => x.itemName != null && x.amount < 0).toList();
-          final scrapIn =
-              gold.where((x) => x.itemName == null && x.amount < 0).toList();
-          final scrapOut =
-              gold.where((x) => x.itemName == null && x.amount > 0).toList();
           bool isFix(TxLine x) =>
               x.note == noteFixGold || x.note == noteFixScrap;
+          // غرامات التسكير ليست كسراً مستلماً أو مسلَّماً
+          final scrapIn = gold
+              .where((x) => x.itemName == null && x.amount < 0 && !isFix(x))
+              .toList();
+          final scrapOut = gold
+              .where((x) => x.itemName == null && x.amount > 0 && !isFix(x))
+              .toList();
+          final fixGoldMg =
+              gold.where(isFix).fold<int>(0, (a, x) => a + x.amount.abs());
           bool special(TxLine x) =>
               x.makingPerGramFils != null ||
               x.note == noteMakingDiscount ||
@@ -161,9 +166,14 @@ class TransactionDetailPage extends ConsumerWidget {
                             title: l.exchangeFee, lines: exchangeFee, l: l),
                       if (fixValue.isNotEmpty)
                         _CashSection(
-                            title: fixValue.first.note == noteFixScrap
-                                ? '${l.opFix} — ${l.fixClassScrap}'
-                                : '${l.opFix} — ${l.fixClassGold}',
+                            title: [
+                              l.opFix,
+                              fixValue.first.note == noteFixScrap
+                                  ? l.fixClassScrap
+                                  : l.fixClassGold,
+                              if (fixGoldMg > 0)
+                                '${formatGrams(fixGoldMg)} ${l.gramsUnit}',
+                            ].join(' — '),
                             lines: fixValue,
                             l: l),
                       if (cashIn.isNotEmpty)

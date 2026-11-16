@@ -45,8 +45,15 @@ Widget _wrap(Widget child) => ProviderScope(
                   grossMg: 50000,
                   netMg: 44250),
             ]),
-        lastMakingsProvider.overrideWith(
-            (ref, id) => {'ring|k21': const LastMaking(1500, false)}),
+        recentMakingsProvider.overrideWith((ref, k) =>
+            k.itemId == 'ring' && k.karatId == 'k21'
+                ? [
+                    LastMaking(1500, false, DateTime(2026, 11, 10)),
+                    LastMaking(2500, false, DateTime(2026, 11, 3)),
+                    LastMaking(3000, true, DateTime(2026, 10, 20)),
+                  ]
+                : const <LastMaking>[]),
+        employeesProvider.overrideWith((ref) => const <Account>[]),
         accountsProvider.overrideWith((ref) => [_shop, _trader, _workshop]),
         counterpartiesProvider
             .overrideWith((ref) => [_shop, _trader, _workshop]),
@@ -98,18 +105,48 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
+  testWidgets('آخر 3 مصنوعيات للصنف عند المحل، واختيار إحداها', (t) async {
+    await _pump(t, const ShopSalePage(shopId: 's'));
+    await t.tap(find.text('خاتم').first);
+    await t.pumpAndSettle();
+    expect(find.text('1.500 / على الغرام · 10/11'), findsOneWidget);
+    expect(find.text('3.000 / على القطعة · 20/10'), findsOneWidget);
+    await t.ensureVisible(find.text('2.500 / على الغرام · 3/11'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('2.500 / على الغرام · 3/11'));
+    await t.pumpAndSettle();
+    expect(find.text('2.500'), findsOneWidget);
+  });
+
+  testWidgets('التسكير مع البيع: غرامات وسعر وتاجر أو مشغل', (t) async {
+    await _pump(t, const ShopSalePage(shopId: 's'));
+    await t.ensureVisible(find.text('تسكير مع البيع (اختياري)'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('تسكير مع البيع (اختياري)'));
+    await t.pumpAndSettle();
+    expect(find.text('غرامات التسكير (صافي)'), findsOneWidget);
+    expect(find.text('تسكير مع تاجر أو مشغل (اختياري)'), findsOneWidget);
+    await t.enterText(
+        find.widgetWithText(TextFormField, 'غرامات التسكير (صافي)'), '100');
+    await t.enterText(
+        find.widgetWithText(TextFormField, 'سعر غرام الحلة').last, '70');
+    await t.pumpAndSettle();
+    expect(find.textContaining('7000.000'), findsWidgets);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('تسكير المحل يعرض النقد والتاجر والتصنيف', (t) async {
     await _pump(t, const TraderTxPage(trader: _shop, op: TraderOp.fixPrice));
     expect(find.text('حلة'), findsOneWidget);
     expect(find.text('كسر'), findsOneWidget);
     expect(find.text('نقد الآن (اختياري)'), findsOneWidget);
-    expect(find.text('تسكير مع تاجر (اختياري)'), findsOneWidget);
+    expect(find.text('تسكير مع تاجر أو مشغل (اختياري)'), findsOneWidget);
     expect(t.takeException(), isNull);
   });
 
   testWidgets('تسكير التاجر بلا اختيار تاجر', (t) async {
     await _pump(t, const TraderTxPage(trader: _trader, op: TraderOp.fixPrice));
-    expect(find.text('تسكير مع تاجر (اختياري)'), findsNothing);
+    expect(find.text('تسكير مع تاجر أو مشغل (اختياري)'), findsNothing);
   });
 
   testWidgets('استلام ذهب يبدأ بمعامل 1.000', (t) async {

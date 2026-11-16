@@ -64,15 +64,23 @@ class _LiraSalePageState extends ConsumerState<LiraSalePage> {
 
   /// صنف "ليرة" يُنشأ مرة واحدة إن لم يكن موجوداً.
   Future<void> _ensureItem() async {
-    final items = await ref.read(itemsProvider.future);
-    final found = items.where((i) => i.name.contains(_liraName)).firstOrNull;
-    if (found != null) {
-      if (mounted) setState(() => _line.itemId = found.id);
-      return;
+    try {
+      final items = await ref.read(itemsProvider.future);
+      // الاسم المطابق أولاً، لا "نص ليرة" أو "ربع ليرة"
+      final found =
+          items.where((i) => i.name.trim() == _liraName).firstOrNull ??
+              items.where((i) => i.name.contains(_liraName)).firstOrNull;
+      if (found != null) {
+        if (mounted) setState(() => _line.itemId = found.id);
+        return;
+      }
+      final item = await ref.read(repositoryProvider).createItem(_liraName);
+      ref.invalidate(itemsProvider);
+      if (mounted) setState(() => _line.itemId = item.id);
+    } catch (e) {
+      // بلا اتصال مثلاً: يبقى الصنف قابلاً للاختيار يدوياً
+      if (mounted) showResult(context, readableError(e), error: true);
     }
-    final item = await ref.read(repositoryProvider).createItem(_liraName);
-    ref.invalidate(itemsProvider);
-    if (mounted) setState(() => _line.itemId = item.id);
   }
 
   @override

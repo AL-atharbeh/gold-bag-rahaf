@@ -26,6 +26,31 @@ const noteFixGold = 'تسكير حلة';
 const noteFixScrap = 'تسكير كسر';
 const noteExchangeFee = 'أجور بدل';
 const noteEmployeeDraw = 'سحب موظف';
+const noteSalaryPay = 'صرف راتب';
+
+/// تسكير داخل حركة البيع: غرامات المحل وسعرها، ومعه اختيارياً تسكير
+/// مقابل مع تاجر أو مشغل بغراماته وسعره.
+class SaleFix {
+  const SaleFix({
+    required this.netMg,
+    required this.priceFils,
+    this.owedToUs = true,
+    this.traderId,
+    this.traderNetMg = 0,
+    this.traderPriceFils = 0,
+    this.classNote = noteFixGold,
+  });
+
+  final WeightMg netMg;
+  final MoneyFils priceFils;
+
+  /// الذهب على المحل (المعتاد بعد البيع) — خطأ إن كان له علينا.
+  final bool owedToUs;
+  final String? traderId;
+  final WeightMg traderNetMg;
+  final MoneyFils traderPriceFils;
+  final String classNote;
+}
 
 /// خصم المصنوعية على المجموع النهائي: كسر الدينار، ومعه خصم إضافي إن وُجد.
 /// 150.500 بلا إضافة = 0.500، وبإضافة 10 = 10.500، فالنهائي 150 أو 140.
@@ -262,11 +287,14 @@ class LedgerBuilder {
     MoneyFils costOutFils = 0,
     MoneyFils costBackFils = 0,
     MoneyFils makingDiscountFils = 0,
+    SaleFix? saleFix,
+    String? tradingIncomeId,
   }) {
     if (goods.isEmpty &&
         scrap.isEmpty &&
         recovered.isEmpty &&
-        cashReceivedFils <= 0) {
+        cashReceivedFils <= 0 &&
+        saleFix == null) {
       throw ArgumentError('الحركة فارغة — أدخل بضاعة أو كسراً أو مبلغاً');
     }
     if (cashReceivedFils < 0 ||
@@ -444,6 +472,25 @@ class LedgerBuilder {
             accountId: cashboxId, amountFils: cashReceivedFils, debit: true))
         ..add(PostingDraft.cash(
             accountId: shopId, amountFils: cashReceivedFils, debit: false));
+    }
+
+    // التسكير في نفس الحركة، ومعه التاجر أو المشغل إن اختير
+    if (saleFix != null) {
+      if (tradingIncomeId == null) {
+        throw ArgumentError('حساب أرباح وفروقات غير مهيّأ');
+      }
+      drafts.addAll(fix(
+        counterpartyId: shopId,
+        tradingIncomeId: tradingIncomeId,
+        cashboxId: cashboxId,
+        netWeightMg: saleFix.netMg,
+        pricePerGramFils: saleFix.priceFils,
+        owedToUs: saleFix.owedToUs,
+        traderId: saleFix.traderId,
+        traderNetMg: saleFix.traderNetMg,
+        traderPriceFils: saleFix.traderPriceFils,
+        classNote: saleFix.classNote,
+      ));
     }
 
     return _checked(drafts);

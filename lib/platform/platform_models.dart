@@ -99,9 +99,6 @@ class Membership {
     required this.permissions,
     this.statusNote,
     this.displayName = '',
-    this.subscriptionEndsAt,
-    this.planNameAr,
-    this.planNameEn,
     this.maxUsers,
     this.maxBags,
   });
@@ -116,9 +113,6 @@ class Membership {
         role: MemberRole.fromWire(j['role'] as String?),
         permissions: _perms(j['permissions']),
         displayName: j['display_name'] as String? ?? '',
-        subscriptionEndsAt: _date(j['subscription_ends_at']),
-        planNameAr: j['plan_name_ar'] as String?,
-        planNameEn: j['plan_name_en'] as String?,
         maxUsers: (j['max_users'] as num?)?.toInt(),
         maxBags: (j['max_bags'] as num?)?.toInt(),
       );
@@ -132,9 +126,6 @@ class Membership {
   final MemberRole role;
   final Set<Perm> permissions;
   final String displayName;
-  final DateTime? subscriptionEndsAt;
-  final String? planNameAr;
-  final String? planNameEn;
   final int? maxUsers;
   final int? maxBags;
 
@@ -143,26 +134,8 @@ class Membership {
 
   bool can(Perm p) => isOwner || permissions.contains(p);
 
-  /// الأيام المتبقية في الاشتراك؛ null = بلا تاريخ انتهاء.
-  int? get daysLeft {
-    final end = subscriptionEndsAt;
-    if (end == null) return null;
-    return end.difference(DateTime.now()).inHours ~/ 24;
-  }
-
-  bool get isExpired =>
-      subscriptionEndsAt != null &&
-      subscriptionEndsAt!.isBefore(DateTime.now());
-
-  bool get isExpiringSoon {
-    final d = daysLeft;
-    return d != null && !isExpired && d <= 14;
-  }
-
-  /// الكتابة مسموحة؟ (نفس فحص current_tenant_writable في SQL)
-  bool get writable => isActive && !isExpired;
-
-  String planName(bool arabic) => (arabic ? planNameAr : planNameEn) ?? '';
+  /// الكتابة مسموحة؟ نسخة الشنطة بترخيص دائم: يكفي أن تكون المنشأة مفعّلة.
+  bool get writable => isActive;
 }
 
 /// كل ما يعرفه التطبيق عن المستخدم بعد الدخول.
@@ -306,203 +279,6 @@ class Bag {
   final bool isActive;
   final String? holderUserId;
   final String? holderName;
-}
-
-class Plan {
-  const Plan({
-    required this.id,
-    required this.code,
-    required this.orgType,
-    required this.nameAr,
-    required this.nameEn,
-    required this.priceFils,
-    required this.periodMonths,
-    required this.maxUsers,
-    required this.maxBags,
-    required this.extraBagPriceFils,
-    required this.isActive,
-  });
-
-  factory Plan.fromJson(Map<String, dynamic> j) => Plan(
-        id: j['id'] as String,
-        code: j['code'] as String,
-        orgType: OrgType.fromWire(j['org_type'] as String?),
-        nameAr: j['name_ar'] as String? ?? '',
-        nameEn: j['name_en'] as String? ?? '',
-        priceFils: (j['price_fils'] as num?)?.toInt() ?? 0,
-        periodMonths: (j['period_months'] as num?)?.toInt() ?? 12,
-        maxUsers: (j['max_users'] as num?)?.toInt() ?? 1,
-        maxBags: (j['max_bags'] as num?)?.toInt() ?? 0,
-        extraBagPriceFils: (j['extra_bag_price_fils'] as num?)?.toInt() ?? 0,
-        isActive: j['is_active'] as bool? ?? true,
-      );
-
-  final String id;
-  final String code;
-  final OrgType orgType;
-  final String nameAr;
-  final String nameEn;
-  final int priceFils;
-  final int periodMonths;
-  final int maxUsers;
-  final int maxBags;
-  final int extraBagPriceFils;
-  final bool isActive;
-
-  String name(bool arabic) => arabic ? nameAr : nameEn;
-
-  Map<String, dynamic> toJson() => {
-        'code': code,
-        'org_type': orgType.wire,
-        'name_ar': nameAr,
-        'name_en': nameEn,
-        'price_fils': priceFils,
-        'period_months': periodMonths,
-        'max_users': maxUsers,
-        'max_bags': maxBags,
-        'extra_bag_price_fils': extraBagPriceFils,
-        'is_active': isActive,
-      };
-}
-
-// ---------------------------------------------------------------------------
-// لوحة الإدارة
-// ---------------------------------------------------------------------------
-
-class AdminOverview {
-  const AdminOverview({
-    required this.pending,
-    required this.active,
-    required this.suspended,
-    required this.expiring,
-    required this.expired,
-    required this.users,
-    required this.byType,
-  });
-
-  factory AdminOverview.fromJson(Map<String, dynamic> j) {
-    int n(String k) => (j[k] as num?)?.toInt() ?? 0;
-    final raw = Map<String, dynamic>.from((j['by_type'] as Map?) ?? const {});
-    return AdminOverview(
-      pending: n('pending'),
-      active: n('active'),
-      suspended: n('suspended'),
-      expiring: n('expiring'),
-      expired: n('expired'),
-      users: n('users'),
-      byType: {
-        for (final t in OrgType.values) t: (raw[t.wire] as num?)?.toInt() ?? 0,
-      },
-    );
-  }
-
-  final int pending;
-  final int active;
-  final int suspended;
-  final int expiring;
-  final int expired;
-  final int users;
-  final Map<OrgType, int> byType;
-}
-
-class OrgSummary {
-  const OrgSummary({
-    required this.id,
-    required this.name,
-    required this.orgType,
-    required this.status,
-    required this.members,
-    required this.bags,
-    this.statusNote,
-    this.ownerName,
-    this.phone,
-    this.city,
-    this.createdAt,
-    this.activatedAt,
-    this.subscriptionEndsAt,
-    this.planId,
-    this.planNameAr,
-    this.planNameEn,
-  });
-
-  factory OrgSummary.fromJson(Map<String, dynamic> j) => OrgSummary(
-        id: j['id'] as String,
-        name: j['name'] as String? ?? '',
-        orgType: OrgType.fromWire(j['org_type'] as String?),
-        status: OrgStatus.fromWire(j['status'] as String?),
-        statusNote: j['status_note'] as String?,
-        ownerName: j['owner_name'] as String?,
-        phone: j['phone'] as String?,
-        city: j['city'] as String?,
-        createdAt: _date(j['created_at']),
-        activatedAt: _date(j['activated_at']),
-        subscriptionEndsAt: _date(j['subscription_ends_at']),
-        planId: j['plan_id'] as String?,
-        planNameAr: j['plan_name_ar'] as String?,
-        planNameEn: j['plan_name_en'] as String?,
-        members: (j['members'] as num?)?.toInt() ?? 0,
-        bags: (j['bags'] as num?)?.toInt() ?? 0,
-      );
-
-  final String id;
-  final String name;
-  final OrgType orgType;
-  final OrgStatus status;
-  final String? statusNote;
-  final String? ownerName;
-  final String? phone;
-  final String? city;
-  final DateTime? createdAt;
-  final DateTime? activatedAt;
-  final DateTime? subscriptionEndsAt;
-  final String? planId;
-  final String? planNameAr;
-  final String? planNameEn;
-  final int members;
-  final int bags;
-
-  bool get isExpired =>
-      subscriptionEndsAt != null &&
-      subscriptionEndsAt!.isBefore(DateTime.now());
-}
-
-class OrgEvent {
-  const OrgEvent(
-      {required this.action, required this.createdAt, this.details = const {}});
-
-  factory OrgEvent.fromJson(Map<String, dynamic> j) => OrgEvent(
-        action: j['action'] as String? ?? '',
-        createdAt: _date(j['created_at']) ?? DateTime.now(),
-        details: Map<String, dynamic>.from((j['details'] as Map?) ?? const {}),
-      );
-
-  final String action;
-  final DateTime createdAt;
-  final Map<String, dynamic> details;
-}
-
-class OrgDetail {
-  const OrgDetail(
-      {required this.members, required this.invitations, required this.events});
-
-  factory OrgDetail.fromJson(Map<String, dynamic> j) => OrgDetail(
-        members: [
-          for (final m in (j['members'] as List?) ?? const [])
-            TeamMember.fromJson(Map<String, dynamic>.from(m as Map)),
-        ],
-        invitations: [
-          for (final i in (j['invitations'] as List?) ?? const [])
-            Invitation.fromJson(Map<String, dynamic>.from(i as Map)),
-        ],
-        events: [
-          for (final e in (j['events'] as List?) ?? const [])
-            OrgEvent.fromJson(Map<String, dynamic>.from(e as Map)),
-        ],
-      );
-
-  final List<TeamMember> members;
-  final List<Invitation> invitations;
-  final List<OrgEvent> events;
 }
 
 /// بيانات المنشأة في ترويسة الكشوفات والفواتير.

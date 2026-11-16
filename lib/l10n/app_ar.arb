@@ -376,11 +376,9 @@
   "teamDesc": "إضافة الموظفين وتحديد صلاحياتهم",
   "bags": "الشنط",
   "bagsDesc": "الشنط وحاملوها",
-  "subscription": "الاشتراك",
   "adminDashboard": "لوحة الإدارة",
   "registerAnotherOrg": "تسجيل حساب آخر",
   "registerAnotherOrgDesc": "مثلاً حساب مستقل إلى جانب عضويتك في مصنع",
-  "planLabel": "الباقة",
   "endsOn": "ينتهي في",
   "noExpiry": "بلا تاريخ انتهاء",
   "daysLeft": "متبقٍّ {days} يوم",
@@ -391,18 +389,6 @@
       }
     }
   },
-  "usersLimit": "المستخدمون",
-  "bagsLimit": "الشنط",
-  "renewHint": "للتجديد أو تغيير الباقة تواصل مع إدارة التطبيق.",
-  "subscriptionExpiring": "ينتهي اشتراكك خلال {days} يوم",
-  "@subscriptionExpiring": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
-  "subscriptionExpired": "انتهى الاشتراك — الحساب للقراءة فقط حتى التجديد",
   "seatsUsed": "{used} من {max} مستخدمين",
   "@seatsUsed": {
     "placeholders": {
@@ -449,11 +435,9 @@
   "noBags": "لا توجد شنط",
   "adminOverview": "نظرة عامة",
   "adminOrgs": "المنشآت",
-  "adminPlans": "الباقات",
   "statPending": "بانتظار التفعيل",
   "statActive": "مفعّلة",
   "statExpiring": "تنتهي خلال 14 يوماً",
-  "statExpired": "اشتراك منتهٍ",
   "statSuspended": "موقوفة",
   "statUsers": "المستخدمون",
   "pendingRequests": "طلبات بانتظار المراجعة",
@@ -488,17 +472,12 @@
   "owner": "المالك",
   "phone": "الهاتف",
   "activityLog": "سجل النشاط",
-  "editPlan": "تعديل الباقة",
-  "newPlan": "باقة جديدة",
-  "planCode": "الرمز",
   "nameAr": "الاسم بالعربية",
   "nameEn": "الاسم بالإنجليزية",
   "price": "السعر (د.أ)",
-  "periodMonths": "مدة الاشتراك (أشهر)",
   "maxUsers": "الحد الأقصى للمستخدمين",
   "maxBags": "الحد الأقصى للشنط",
   "extraBagPrice": "سعر الشنطة الإضافية (د.أ)",
-  "planActive": "الباقة متاحة",
   "perPeriod": "{price} د.أ / {months} شهر",
   "@perPeriod": {
     "placeholders": {
@@ -590,7 +569,7 @@
   "accountsBySupport": "إضافة حساب أو تغيير كلمة مرور أو إيقاف حساب يتم من الدعم. اضغط على حساب لتعديل صلاحياته.",
   "appSection": "التطبيق",
   "aboutEdition": "عن النسخة",
-  "editionVersion": "نسخة تاجر الشنطة · 1.2.0",
+  "editionVersion": "نسخة تاجر الشنطة · 1.3.0",
   "support": "الدعم",
   "edit": "تعديل",
   "needMigration13": "يلزم تنفيذ ملف 0013_bag_edition.sql في Supabase أولاً",
@@ -771,8 +750,8 @@
   "fixClassScrap": "كسر",
   "fixCashNow": "نقد الآن (اختياري)",
   "fixCashHint": "كله أو جزء منه أو صفر — والباقي يبقى ذمة.",
-  "fixWithTrader": "تسكير مع تاجر (اختياري)",
-  "noTrader": "بدون تاجر",
+  "fixWithTrader": "تسكير مع تاجر أو مشغل (اختياري)",
+  "noTrader": "بدون تاجر أو مشغل",
   "traderGrams": "غرامات التاجر",
   "traderFixHint": "فارغة = نفس غرامات المحل وسعره.",
   "opReceiveGold": "استلام ذهب",
@@ -833,5 +812,18 @@
         "type": "int"
       }
     }
-  }
+  },
+  "tabExpenses": "المصاريف",
+  "expensesTitle": "المصاريف",
+  "noExpenses": "لا مصاريف في هذه الفترة",
+  "expensesTotal": "مجموع المصاريف",
+  "expensesOnEmployees": "منها باسم الموظفين",
+  "expenseOnEmployee": "على حساب موظف (اختياري)",
+  "noEmployee": "بدون موظف",
+  "expenseEmployeeHint": "يخرج من كاش الشنطة ويُخصم من راتب الموظف، ويظهر في مصاريف اليوم.",
+  "fixInSale": "تسكير مع البيع (اختياري)",
+  "fixInSaleHint": "تسكير غرامات المحل في نفس الفاتورة، ومعه تاجر أو مشغل إن أردت.",
+  "fixGrams": "غرامات التسكير (صافي)",
+  "fixNeedsGramsPrice": "أدخل غرامات التسكير وسعره، أو أطفئ التسكير.",
+  "fixSpread": "فرق السعر"
 }

@@ -137,7 +137,8 @@ class _EmployeeSheetPageState extends ConsumerState<EmployeeSheetPage> {
                     icon: const Icon(Icons.receipt_long_outlined, size: 18),
                     label: const Text('مصروف باسمه'),
                   ),
-                  if (sheet.started && sheet.remainingFils > 0)
+                  // دورة سابقة: باقيها مرحَّل للحالية، فلا يُصرف بتاريخ قديم
+                  if (_isCurrent && sheet.started && sheet.remainingFils > 0)
                     OutlinedButton.icon(
                       onPressed: () => _record(salaryPay: sheet.remainingFils),
                       icon: const Icon(Icons.payments_outlined, size: 18),

@@ -36,6 +36,8 @@ class DaySummary {
     for (final p in postings) {
       if (p.txReversed || p.txType == TxType.reversal) continue;
       txs.add(p.txId);
+      // الرصيد الافتتاحي موجود قبل اليوم، لا مقبوض ولا كسر مستلم فيه
+      if (p.txType == TxType.openingBalance) continue;
 
       if (p.accountId == bagId && p.ledger == LedgerKind.gold) {
         if (p.itemId == null) {

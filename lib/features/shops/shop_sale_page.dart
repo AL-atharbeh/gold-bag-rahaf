@@ -18,14 +18,23 @@ import '../parties/balance_widgets.dart';
 enum _Discount { none, fraction, extra }
 
 /// تكلفة المصنوعية التي تتبع وزناً يخرج من الشنطة أو يعود إليها — بمتوسط
-/// رأس المال لكل غرام صافٍ فيها.
-int capitalCost(int net, AccountBalance? bag) {
-  if (bag == null || net <= 0 || bag.goldMg <= 0 || bag.cashFils <= 0) {
+/// رأس المال لكل غرام صافٍ من البضاعة فيها.
+///
+/// [scrapMg] كسر الشنطة الصافي: لا مصنوعية عليه، فلا يدخل في المتوسط —
+/// وإلا نقصت التكلفة الخارجة مع البيع وزاد ربح المصنوعية بغير حق.
+int capitalCost(int net, AccountBalance? bag, {int scrapMg = 0}) {
+  final goodsMg = (bag?.goldMg ?? 0) - scrapMg;
+  if (bag == null || net <= 0 || goodsMg <= 0 || bag.cashFils <= 0) {
     return 0;
   }
-  final cost = (bag.cashFils * net + bag.goldMg ~/ 2) ~/ bag.goldMg;
+  final cost = (bag.cashFils * net + goodsMg ~/ 2) ~/ goodsMg;
   return cost > bag.cashFils ? bag.cashFils : cost;
 }
+
+/// كسر الشنطة الصافي من مخزونها.
+int bagScrapMg(List<ItemStock>? stock) => (stock ?? const <ItemStock>[])
+    .where((s) => s.itemId == null)
+    .fold<int>(0, (a, s) => a + s.netMg);
 
 /// بيع للمحل من الشنطة، مع استلام كسر و/أو نقد في نفس الحركة.
 ///
@@ -308,6 +317,7 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
     final recoveredNet = recovered.fold<int>(0, (a, g) => a + g.netMg);
     final makingTotal = goods.fold<int>(0, (a, g) => a + g.makingFils) -
         recovered.fold<int>(0, (a, g) => a + g.makingFils);
+    final scrapMg = bagScrapMg(ref.read(itemStockProvider(bag)).valueOrNull);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     setState(() => _busy = true);
@@ -321,8 +331,9 @@ class _ShopSalePageState extends ConsumerState<ShopSalePage> {
             scrap: scrap,
             recovered: recovered,
             cashReceivedFils: cash,
-            costOutFils: capitalCost(goodsNet, bagBalance),
-            costBackFils: capitalCost(recoveredNet, bagBalance),
+            costOutFils: capitalCost(goodsNet, bagBalance, scrapMg: scrapMg),
+            costBackFils:
+                capitalCost(recoveredNet, bagBalance, scrapMg: scrapMg),
             makingDiscountFils: _discountFils(makingTotal),
             saleFix: saleFix,
             tradingIncomeId: sys[SystemAccount.tradingIncome],

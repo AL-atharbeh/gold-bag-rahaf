@@ -141,7 +141,11 @@ class _LiraSalePageState extends ConsumerState<LiraSalePage> {
             cashboxId: cashbox,
             makingIncomeId: making,
             goods: [g],
-            costOutFils: _fromBag ? capitalCost(g.netMg, bag) : 0,
+            costOutFils: _fromBag
+                ? capitalCost(g.netMg, bag,
+                    scrapMg: bagScrapMg(
+                        ref.read(itemStockProvider(bagId)).valueOrNull))
+                : 0,
             occurredAt: _date,
             note: _note.text.trim().isEmpty ? null : _note.text.trim(),
           );

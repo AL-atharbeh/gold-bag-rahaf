@@ -4,6 +4,7 @@ import 'package:gold_bashar/domain/ledger.dart';
 import 'package:gold_bashar/domain/models.dart';
 import 'package:gold_bashar/domain/payroll.dart';
 import 'package:gold_bashar/features/home/day_summary.dart';
+import 'package:gold_bashar/features/shops/shop_sale_page.dart';
 
 int sum(List<PostingDraft> d, String account, LedgerKind ledger) => d
     .where((p) => p.accountId == account && p.ledger == ledger)
@@ -110,6 +111,24 @@ void main() {
     });
   });
 
+  test('الرصيد الافتتاحي لا يُحسب نقداً مقبوضاً ولا كسراً مستلماً اليوم', () {
+    DayPosting p(String account, LedgerKind ledger, int amount) => DayPosting(
+          txId: 'o',
+          accountId: account,
+          ledger: ledger,
+          amount: amount,
+          txType: TxType.openingBalance,
+          txReversed: false,
+        );
+    final d = DaySummary.from(
+      [p('box', LedgerKind.cash, 1000000), p('bag', LedgerKind.gold, 17400)],
+      bagId: 'bag',
+      cashboxId: 'box',
+    );
+    expect(d.cashInFils, 0);
+    expect(d.scrapInMg, 0);
+  });
+
   test('صرف الراتب يُحسب ضمن مصاريف اليوم', () {
     DayPosting p(String account, int amount, String? note) => DayPosting(
           txId: 'x',
@@ -127,6 +146,20 @@ void main() {
     );
     expect(d.expensesFils, 150000);
     expect(d.expenses, hasLength(1));
+  });
+
+  test('تكلفة المصنوعية الخارجة بمتوسط البضاعة لا الكسر', () {
+    // الشنطة: 44.250 غ بضاعة بمصنوعية 50، و17.400 غ كسر بلا مصنوعية
+    const bag = AccountBalance(
+        accountId: 'bag',
+        name: 'الشنطة',
+        kind: AccountKind.inventoryLocation,
+        goldMg: 61650,
+        cashFils: 50000);
+    // بيع 8.850 غ = خُمس البضاعة → خُمس المصنوعية: 10 دنانير
+    expect(capitalCost(8850, bag, scrapMg: 17400), 10000);
+    // الحساب القديم كان يوزّعها على الكسر أيضاً فيُخرج 7.178 فقط
+    expect(capitalCost(8850, bag), 7178);
   });
 
   group('التسكير مع البيع', () {

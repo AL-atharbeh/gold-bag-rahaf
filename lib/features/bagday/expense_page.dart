@@ -166,7 +166,7 @@ class _ExpensePageState extends ConsumerState<ExpensePage> {
                       const SizedBox(height: 14),
                     ],
                     if (widget.employee != null) ...[
-                      Pill('${l.expenseOnEmployee}: ${widget.employee!.name}'),
+                      Pill('${l.tabEmployees}: ${widget.employee!.name}'),
                       const SizedBox(height: 14),
                     ],
                     DinarsField(

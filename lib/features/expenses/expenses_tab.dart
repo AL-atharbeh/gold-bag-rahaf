@@ -83,8 +83,9 @@ class _ExpensesListState extends ConsumerState<_ExpensesList> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cashbox =
-        ref.watch(systemAccountsProvider).valueOrNull?[SystemAccount.cashbox];
+    final sys = ref.watch(systemAccountsProvider).valueOrNull;
+    final cashbox = sys?[SystemAccount.cashbox];
+    final expensesId = sys?[SystemAccount.expenses];
     if (cashbox == null) return const SizedBox.shrink();
     final range = (from: _period.from, to: _period.endExclusive);
     final rows = ref.watch(cashboxPostingsProvider(range));
@@ -156,8 +157,10 @@ class _ExpensesListState extends ConsumerState<_ExpensesList> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
+                          // من جهة المصاريف أو الموظف: يظهر "نقد مدفوع"
                           builder: (_) => TransactionDetailPage(
-                              txId: p.txId, partyId: p.partyId ?? cashbox),
+                              txId: p.txId,
+                              partyId: p.partyId ?? expensesId ?? cashbox),
                         ),
                       ),
                       child: Row(children: [

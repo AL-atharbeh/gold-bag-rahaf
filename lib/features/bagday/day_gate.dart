@@ -15,7 +15,10 @@ class DayGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final gate = ref.watch(dayGateProvider);
+    // إعادة التحميل (إضافة طرف تُحدّث الحسابات مثلاً) تُبقي الواجهة كما هي،
+    // وإلا استُبدل الهيكل بمؤشر تحميل وضاع التبويب المفتوح.
     return gate.when(
+      skipLoadingOnReload: true,
       loading: () => const Scaffold(
         backgroundColor: Colors.white,
         body: Center(

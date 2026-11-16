@@ -1,0 +1,41 @@
+# يُبقي مشروع Supabase المجاني فعّالاً: يتوقف المشروع إن مرّ أسبوع بلا أي
+# طلب، فهنا طلب قراءة صغير كل يومين — حتى لو توقف التاجر عن العمل في إجازة.
+#
+# الطلب بالمفتاح العام فقط (الموجود أصلاً في lib/core/config.dart)، فيصل إلى
+# قاعدة البيانات وتردّه بـ"لا صلاحية" دون أن يقرأ أي بيانات — وهذا يكفي
+# ليُحسب نشاطاً. يفشل التشغيل (ويصلك بريد من GitHub) إن كان المشروع متوقفاً.
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: '0 6 */2 * *' # كل يومين، 9 صباحاً بتوقيت الأردن
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: lib/core/config.dart
+          sparse-checkout-cone-mode: false
+
+      - name: Ping database
+        run: |
+          url=$(grep -A2 "'SUPABASE_URL'" lib/core/config.dart | grep -o "https://[^']*")
+          key=$(grep -A2 "'SUPABASE_ANON_KEY'" lib/core/config.dart \
+                | grep -o "defaultValue: '[^']*'" | sed "s/defaultValue: '//; s/'\$//")
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 60 \
+                 "$url/rest/v1/karats?select=id&limit=1" \
+                 -H "apikey: $key" -H "Authorization: Bearer $key")
+          echo "HTTP $code"
+          # 401 = وصل قاعدة البيانات ورُفض بلا صلاحية — هذا هو المقصود.
+          # 5xx أو 000 = المشروع متوقف أو لا يرد.
+          if [ "$code" = "000" ] || [ "$code" -ge 500 ]; then
+            echo "::error::Supabase لا يرد ($code) — افتح لوحة Supabase واضغط Restore"
+            exit 1
+          fi

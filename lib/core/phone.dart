@@ -28,3 +28,8 @@ String displayPhone(String? phone) {
   if (d.startsWith('962') && d.length == 12) return '0${d.substring(3)}';
   return phone;
 }
+
+/// البريد الداخلي للدخول: "+962791234567" → "962791234567@phone.goldbashar.app".
+/// نظير edition_login_email في قاعدة البيانات (0017).
+String phoneLoginEmail(String phone) =>
+    '${phone.replaceAll(RegExp(r'\D'), '')}@phone.goldbashar.app';

@@ -37,6 +37,11 @@ void main() {
       expect(normalizeJordanMobile(''), isNull);
     });
 
+    test('بريد الدخول الداخلي يُشتق من الرقم كما في قاعدة البيانات', () {
+      expect(phoneLoginEmail(normalizeJordanMobile('0797040903')!),
+          '962797040903@phone.goldbashar.app');
+    });
+
     test('العرض يعيد الصفر في البداية', () {
       expect(displayPhone('962791234567'), '0791234567');
       expect(displayPhone('+962791234567'), '0791234567');

@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../core/phone.dart';
 import 'platform_models.dart';
 
 /// الدخول والمنشآت والفريق والشنط ولوحة الإدارة.
@@ -35,8 +36,12 @@ class PlatformRepository {
 
   /// دخول نسخة الشنطة: رقم وكلمة مرور لحساب أنشأناه مسبقاً.
   /// لا يُنشئ حساباً أبداً — الرقم غير الموجود يفشل كأي كلمة مرور خاطئة.
+  ///
+  /// يدخل بالبريد الداخلي المشتق من الرقم (0017) لا بالهاتف: دخول الهاتف
+  /// في Supabase يتطلب مزوّد رسائل، والنسخة لا ترسل رسائل أبداً.
   Future<void> passwordSignIn(String phone, String password) =>
-      _client.auth.signInWithPassword(phone: phone, password: password);
+      _client.auth.signInWithPassword(
+          email: phoneLoginEmail(phone), password: password);
 
   Future<void> signOut() => _client.auth.signOut();
 

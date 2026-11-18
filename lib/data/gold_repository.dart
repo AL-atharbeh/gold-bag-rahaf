@@ -80,6 +80,10 @@ abstract class GoldRepository {
           {required bool goodsConfirmed, String? note}) =>
       throw UnimplementedError('closeBagDay غير مدعوم في هذا المستودع');
 
+  /// إعادة فتح يوم مغلق لتسجيل حركة نُسيت، ثم يُغلق ثانية (0018).
+  Future<void> reopenBagDay(DateTime day) =>
+      throw UnimplementedError('reopenBagDay غير مدعوم في هذا المستودع');
+
   /// أصناف البضاعة: الأساسية (خاتم، حلق…) وما أضافه الموزّع.
   Future<List<Item>> items() =>
       throw UnimplementedError('items غير مدعوم في هذا المستودع');

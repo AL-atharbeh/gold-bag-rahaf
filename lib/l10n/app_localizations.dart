@@ -3325,6 +3325,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'فرق السعر'**
   String get fixSpread;
+
+  /// No description provided for @reopenDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة فتح اليوم'**
+  String get reopenDay;
+
+  /// No description provided for @reopenDayConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم مغلق بجرده. أعد فتحه لتسجيل حركة نُسيت، ثم أغلقه من جديد بعدّ الكاش.'**
+  String get reopenDayConfirm;
+
+  /// No description provided for @dayClosedHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم مغلق — لا تُسجَّل حركة بتاريخه حتى يُعاد فتحه.'**
+  String get dayClosedHint;
+
+  /// No description provided for @goodsNet24.
+  ///
+  /// In ar, this message translates to:
+  /// **'صافي البضاعة عيار 24'**
+  String get goodsNet24;
 }
 
 class _AppLocalizationsDelegate

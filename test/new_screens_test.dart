@@ -155,11 +155,11 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
-  testWidgets('الليرة: أجور القطعة، والشنطة مغلقة افتراضياً', (t) async {
+  testWidgets('الليرة: أجور القطعة، وتخرج من الشنطة افتراضياً', (t) async {
     await _pump(t, const LiraSalePage(trader: _trader));
     expect(find.text('الأجور / قطعة'), findsOneWidget);
     final sw = t.widget<SwitchListTile>(find.byType(SwitchListTile));
-    expect(sw.value, isFalse);
+    expect(sw.value, isTrue);
     expect(t.takeException(), isNull);
   });
 

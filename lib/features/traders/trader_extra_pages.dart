@@ -37,8 +37,8 @@ Widget _saveButton(AppLocalizations l, bool busy, VoidCallback onPressed) =>
 
 /// بيع ليرة للتاجر: وزن قائم وعدد، والأجور على القطعة لنا.
 ///
-/// تصير عليه ذهباً بصافيها ونقداً بأجورها. خروجها من الشنطة اختياري:
-/// مغلق افتراضياً حتى يتضح هل تُحمل الليرات في الشنطة أم لا.
+/// تصير عليه ذهباً بصافيها ونقداً بأجورها. تخرج من الشنطة افتراضياً —
+/// فلا تُباع ليرة غير موجودة؛ يُطفأ الزر لليرة من خارج المخزون.
 class LiraSalePage extends ConsumerStatefulWidget {
   const LiraSalePage({super.key, required this.trader});
 
@@ -53,7 +53,7 @@ class _LiraSalePageState extends ConsumerState<LiraSalePage> {
   final _note = TextEditingController();
   final _line = GoodsLineState()..perPiece = true;
   DateTime _date = DateTime.now();
-  bool _fromBag = false;
+  bool _fromBag = true;
   bool _busy = false;
 
   @override

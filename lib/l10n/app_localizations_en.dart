@@ -1746,4 +1746,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fixSpread => 'Price difference';
+
+  @override
+  String get reopenDay => 'Reopen day';
+
+  @override
+  String get reopenDayConfirm =>
+      'The day is closed with its count. Reopen it to record a forgotten movement, then close it again with a cash count.';
+
+  @override
+  String get dayClosedHint =>
+      'Day closed — no movement can be dated today until it is reopened.';
+
+  @override
+  String get goodsNet24 => 'Goods net (24K)';
 }

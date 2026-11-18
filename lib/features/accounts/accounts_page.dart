@@ -358,7 +358,6 @@ class AccountsPage extends ConsumerWidget {
                                 icon: const Icon(Icons.add_rounded, size: 16),
                                 label: Text(switch (a.kind) {
                                   AccountKind.showroom => context.l10n.movement,
-                                  AccountKind.factory => 'وارد',
                                   _ => 'حركة',
                                 }),
                                 style: TextButton.styleFrom(

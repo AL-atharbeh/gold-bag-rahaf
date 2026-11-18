@@ -430,7 +430,7 @@ class _BagCard extends ConsumerWidget {
             children: [
               _statGrid([
                 _Stat(l.totalPieces, '$pieces'),
-                _Stat(l.totalNet, '${formatGrams(net)} ${l.gramsUnit}',
+                _Stat(l.goodsNet24, '${formatGrams(net)} ${l.gramsUnit}',
                     color: AppColors.goldDark),
                 _Stat(l.scrapInBag, '${formatGrams(scrapNet)} ${l.gramsUnit}'),
                 _Stat(l.bagCapital, '${formatDinars(capital)} ${l.dinarUnit}'),

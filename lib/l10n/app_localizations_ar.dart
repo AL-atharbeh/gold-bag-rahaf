@@ -1732,4 +1732,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fixSpread => 'فرق السعر';
+
+  @override
+  String get reopenDay => 'إعادة فتح اليوم';
+
+  @override
+  String get reopenDayConfirm =>
+      'اليوم مغلق بجرده. أعد فتحه لتسجيل حركة نُسيت، ثم أغلقه من جديد بعدّ الكاش.';
+
+  @override
+  String get dayClosedHint =>
+      'اليوم مغلق — لا تُسجَّل حركة بتاريخه حتى يُعاد فتحه.';
+
+  @override
+  String get goodsNet24 => 'صافي البضاعة عيار 24';
 }

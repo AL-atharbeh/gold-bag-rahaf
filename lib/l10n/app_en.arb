@@ -561,5 +561,9 @@
   "fixInSaleHint": "Fix the shop's grams in the same invoice, optionally against a trader or workshop.",
   "fixGrams": "Grams to fix (net)",
   "fixNeedsGramsPrice": "Enter the fix grams and price, or switch the fix off.",
-  "fixSpread": "Price difference"
+  "fixSpread": "Price difference",
+  "reopenDay": "Reopen day",
+  "reopenDayConfirm": "The day is closed with its count. Reopen it to record a forgotten movement, then close it again with a cash count.",
+  "dayClosedHint": "Day closed — no movement can be dated today until it is reopened.",
+  "goodsNet24": "Goods net (24K)"
 }

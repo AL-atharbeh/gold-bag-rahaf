@@ -251,6 +251,12 @@ class SupabaseGoldRepository implements GoldRepository {
     });
     unawaited(_refreshBalances());
   }
+  @override
+  Future<void> reopenBagDay(DateTime day) async {
+    _ensureOnline();
+    await _client.rpc('reopen_bag_day', params: {'p_day': _day(day)});
+  }
+
 
   @override
   Future<List<Item>> items() async {

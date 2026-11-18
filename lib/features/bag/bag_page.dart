@@ -9,6 +9,7 @@ import '../../domain/enums.dart';
 import '../../domain/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../accounts/accounts_page.dart';
+import '../common/inputs.dart';
 import '../common/ui.dart';
 import '../../platform/platform_models.dart';
 import '../../platform/session.dart';
@@ -21,6 +22,32 @@ import '../reports/reports_page.dart';
 import 'bag_inventory.dart';
 import 'bag_movements.dart';
 import 'goods_in_page.dart';
+
+/// إعادة فتح يوم مغلق بعد تأكيد — لتسجيل حركة نُسيت.
+Future<void> _reopenDay(BuildContext context, WidgetRef ref,
+    AppLocalizations l, DateTime day) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: Text(l.reopenDay),
+      content: Text(l.reopenDayConfirm),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
+        FilledButton(
+            onPressed: () => Navigator.pop(c, true), child: Text(l.reopenDay)),
+      ],
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  if (!ensureOnline(context, ref)) return;
+  try {
+    await ref.read(repositoryProvider).reopenBagDay(day);
+    invalidateBagDay(ref);
+  } catch (e) {
+    if (context.mounted) showResult(context, readableError(e), error: true);
+  }
+}
 
 /// الشنطة بتبويبين: المخزون (ما فيها الآن ووارد البضاعة)، والمشاغل
 /// التي تأتي منها البضاعة — كل مشغل طرف له دفتره كأي تاجر.
@@ -125,6 +152,11 @@ class _StockView extends ConsumerWidget {
     final openDay = last != null && !last.isClosed && sameDay(last.day, today())
         ? last
         : null;
+    // اليوم مغلق: لا حركة بتاريخه حتى يُعاد فتحه
+    final closedToday =
+        last != null && last.isClosed && sameDay(last.day, today())
+            ? last
+            : null;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -249,7 +281,20 @@ class _StockView extends ConsumerWidget {
                                 const Icon(Icons.nightlight_outlined, size: 18),
                             label: Text(l.closeDay),
                           ),
+                        if (closedToday != null)
+                          OutlinedButton.icon(
+                            onPressed: () => _reopenDay(context, ref, l,
+                                closedToday.day),
+                            icon: const Icon(Icons.lock_open_rounded, size: 18),
+                            label: Text(l.reopenDay),
+                          ),
                       ]),
+                      if (closedToday != null) ...[
+                        const SizedBox(height: 6),
+                        Text(l.dayClosedHint,
+                            style: const TextStyle(
+                                fontSize: 12, color: AppColors.textSecondary)),
+                      ],
                     ],
                   ),
                 ),

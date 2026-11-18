@@ -30,9 +30,9 @@ create trigger transactions_closed_day
 
 revoke all on function guard_closed_bag_day() from public, anon, authenticated;
 
--- إعادة فتح يوم مغلق (اليوم الحالي أو آخر يوم): يبقى جرده السابق في
--- السجل (closing_* تُمسح ويُحفظ وقت الإغلاق السابق في الملاحظة)، ويُغلق
--- من جديد بعد تسجيل الحركة الناقصة.
+-- إعادة فتح يوم مغلق (آخر يوم فقط): يُسجَّل في ملاحظة الفتح وقت الإغلاق
+-- السابق وكاشه — فالإغلاق الجديد يكتب فوق بيانات الإغلاق — ثم يُغلق من
+-- جديد بعد تسجيل الحركة الناقصة.
 create or replace function reopen_bag_day(p_day date)
 returns void language plpgsql security definer set search_path = public as $$
 declare v_row bag_days%rowtype;
@@ -50,8 +50,10 @@ begin
      set closed_at = null,
          closed_by = null,
          goods_confirmed = false,
-         closing_note = concat_ws(' — ', nullif(closing_note, ''),
-                                  'أُعيد فتحه بعد إغلاق ' || to_char(closed_at at time zone 'Asia/Amman', 'HH24:MI'))
+         opening_note = concat_ws(' — ', nullif(opening_note, ''),
+                                  'أُعيد فتحه بعد إغلاق '
+                                  || to_char(closed_at at time zone 'Asia/Amman', 'HH24:MI')
+                                  || ' على كاش ' || (closing_cash_fils / 1000.0)::numeric(14,3))
    where id = v_row.id;
 end $$;
 
